@@ -123,6 +123,39 @@ export function ConfigFlatten(obj: IDictionary): IDictionary {
  * console.log(JSON.stringify(plain)); // {"dialogWidth":500, "openOnDblClick": true, "editSrc": true, ...}
  * ```
  */
+/**
+ * Deep-merges `source` into `target` in-place.
+ * Uses the same merge semantics as {@link ConfigProto}:
+ * - Nested plain objects are merged recursively
+ * - {@link isAtom | Atomic} values replace the target entirely
+ * - Everything else (primitives, arrays, class instances) replaces the target value
+ *
+ * Designed for patching `Config.defaultOptions` without losing existing keys:
+ *
+ * ```js
+ * Jodit.configure({
+ *   controls: {
+ *     someButton: { group: 'custom' }
+ *   }
+ * });
+ * // Only `controls.someButton` is touched — all other controls remain intact.
+ * ```
+ *
+ * @see {@link ConfigProto} for the prototype-chain variant used at editor creation time
+ */
+export function ConfigMerge(target: IDictionary, source: IDictionary): void {
+	Object.keys(source).forEach(key => {
+		const srcVal = source[key];
+		const tgtVal = target[key];
+
+		if (isPlainObject(srcVal) && isPlainObject(tgtVal) && !isAtom(srcVal)) {
+			ConfigMerge(tgtVal, srcVal);
+		} else {
+			target[key] = srcVal;
+		}
+	});
+}
+
 export function ConfigDeepFlatten(obj: IDictionary): IDictionary {
 	return keys(obj, false).reduce((app, key) => {
 		app[key] = isPlainObject(obj[key])

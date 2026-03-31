@@ -9,6 +9,28 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.11.16
+
+#### :rocket: New Feature
+
+- Add `Jodit.configure()` static method for deep-merging partial options into global defaults without losing existing keys. Previously, overriding nested defaults like `controls` or `createAttributes` required setting each property individually. Now you can patch only the keys you need:
+
+  ```js
+  // Add a button without losing existing controls
+  Jodit.configure({
+    controls: {
+      myButton: { icon: 'pencil', command: 'selectall' }
+    }
+  });
+
+  // Partially update createAttributes
+  Jodit.configure({
+    createAttributes: {
+      div: { class: 'my-class' }
+    }
+  });
+  ```
+
 ## 4.11.15
 
 #### :house: Internal

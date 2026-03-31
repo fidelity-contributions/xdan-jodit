@@ -54,6 +54,7 @@ import {
 	asArray,
 	attr,
 	callPromise,
+	ConfigMerge,
 	ConfigProto,
 	css,
 	error,
@@ -207,6 +208,53 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 	 */
 	static override get defaultOptions(): Config {
 		return Config.defaultOptions;
+	}
+
+	/**
+	 * Deep-merges partial options into the global defaults without replacing
+	 * top-level objects. This lets you patch nested settings (e.g. a single
+	 * button inside `controls`) without losing the rest:
+	 *
+	 * ```js
+	 * // Add a custom button — all existing controls remain untouched
+	 * Jodit.configure({
+	 *   controls: {
+	 *     myButton: {
+	 *       icon: 'pencil',
+	 *       command: 'selectall'
+	 *     }
+	 *   }
+	 * });
+	 *
+	 * // Override only the `group` of an existing button
+	 * Jodit.configure({
+	 *   controls: {
+	 *     someButton: { group: 'custom' }
+	 *   }
+	 * });
+	 *
+	 * // Works with any nested option
+	 * Jodit.configure({
+	 *   createAttributes: {
+	 *     div: { class: 'my-class' }
+	 *   }
+	 * });
+	 *
+	 * // Use Jodit.atom() to replace a nested value entirely instead of merging
+	 * Jodit.configure({
+	 *   controls: {
+	 *     fontsize: {
+	 *       list: Jodit.atom([8, 9, 10])
+	 *     }
+	 *   }
+	 * });
+	 * ```
+	 *
+	 * @see {@link ConfigMerge} for the merge algorithm
+	 * @see {@link ConfigProto} for per-instance prototype-based merge used at editor creation time
+	 */
+	static configure(options: IDictionary): void {
+		ConfigMerge(Jodit.defaultOptions, options);
 	}
 
 	static fatMode: boolean = FAT_MODE;

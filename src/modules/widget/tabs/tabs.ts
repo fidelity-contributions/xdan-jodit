@@ -71,6 +71,7 @@ export const TabsWidget = (
 		button: IUIButton;
 		tab: HTMLElement;
 	}> = {};
+
 	const buttonList: IUIButton[] = [];
 
 	let firstTab: string = '';

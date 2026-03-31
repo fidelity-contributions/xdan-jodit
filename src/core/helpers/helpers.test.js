@@ -816,5 +816,255 @@ describe('Test helpers', () => {
 				});
 			});
 		});
+
+		describe('ConfigMerge', () => {
+			const ConfigMerge = Jodit.modules.Helpers.ConfigMerge;
+
+			it('Should deep-merge source into target without replacing sibling keys', () => {
+				const target = {
+					a: 1,
+					b: {
+						c: 2,
+						d: 3
+					}
+				};
+
+				ConfigMerge(target, { b: { c: 10 } });
+
+				expect(target.a).eq(1);
+				expect(target.b.c).eq(10);
+				expect(target.b.d).eq(3);
+			});
+
+			it('Should add new keys at any depth', () => {
+				const target = {
+					controls: {
+						bold: { icon: 'bold' }
+					}
+				};
+
+				ConfigMerge(target, {
+					controls: {
+						myButton: { icon: 'pencil', command: 'selectall' }
+					}
+				});
+
+				expect(target.controls.bold.icon).eq('bold');
+				expect(target.controls.myButton.icon).eq('pencil');
+				expect(target.controls.myButton.command).eq('selectall');
+			});
+
+			it('Should overwrite primitives', () => {
+				const target = { language: 'en', theme: 'default' };
+
+				ConfigMerge(target, { language: 'de' });
+
+				expect(target.language).eq('de');
+				expect(target.theme).eq('default');
+			});
+
+			it('Should replace atomic values entirely', () => {
+				const target = {
+					controls: {
+						fontsize: {
+							list: [10, 12, 14, 16],
+							icon: 'fontsize'
+						}
+					}
+				};
+
+				ConfigMerge(target, {
+					controls: {
+						fontsize: {
+							list: Jodit.atom([8, 9, 10])
+						}
+					}
+				});
+
+				expect(target.controls.fontsize.list).deep.eq([8, 9, 10]);
+				expect(target.controls.fontsize.icon).eq('fontsize');
+			});
+
+			it('Should replace arrays (non-atom) entirely', () => {
+				const target = { items: [1, 2, 3] };
+
+				ConfigMerge(target, { items: [4, 5] });
+
+				expect(target.items).deep.eq([4, 5]);
+			});
+
+			it('Should handle multiple nested levels', () => {
+				const target = {
+					a: {
+						b: {
+							c: {
+								d: 1,
+								e: 2
+							},
+							f: 3
+						}
+					}
+				};
+
+				ConfigMerge(target, { a: { b: { c: { d: 10 } } } });
+
+				expect(target.a.b.c.d).eq(10);
+				expect(target.a.b.c.e).eq(2);
+				expect(target.a.b.f).eq(3);
+			});
+		});
+
+		describe('Jodit.configure', () => {
+			let origControls;
+
+			beforeEach(() => {
+				origControls = { ...Jodit.defaultOptions.controls };
+			});
+
+			afterEach(() => {
+				// Restore controls to not affect other tests
+				Object.keys(Jodit.defaultOptions.controls).forEach(key => {
+					if (!(key in origControls)) {
+						delete Jodit.defaultOptions.controls[key];
+					}
+				});
+				Object.assign(Jodit.defaultOptions.controls, origControls);
+			});
+
+			it('Should deep-merge into defaultOptions.controls without losing existing buttons', () => {
+				const boldBefore = Jodit.defaultOptions.controls.bold;
+
+				Jodit.configure({
+					controls: {
+						testConfigureBtn: {
+							icon: 'pencil',
+							command: 'selectall'
+						}
+					}
+				});
+
+				expect(Jodit.defaultOptions.controls.testConfigureBtn.icon).eq(
+					'pencil'
+				);
+				expect(
+					Jodit.defaultOptions.controls.testConfigureBtn.command
+				).eq('selectall');
+				expect(Jodit.defaultOptions.controls.bold).eq(boldBefore);
+			});
+
+			it('Should partially update an existing control', () => {
+				Jodit.configure({
+					controls: {
+						testConfigureBtn: {
+							icon: 'pencil',
+							command: 'selectall',
+							group: 'custom'
+						}
+					}
+				});
+
+				// Now update only group
+				Jodit.configure({
+					controls: {
+						testConfigureBtn: {
+							group: 'other'
+						}
+					}
+				});
+
+				expect(Jodit.defaultOptions.controls.testConfigureBtn.icon).eq(
+					'pencil'
+				);
+				expect(Jodit.defaultOptions.controls.testConfigureBtn.group).eq(
+					'other'
+				);
+			});
+
+			it('Should deep-merge createAttributes without losing existing entries', () => {
+				const origTable = Jodit.defaultOptions.createAttributes.table;
+
+				Jodit.configure({
+					createAttributes: {
+						div: { class: 'test-class' }
+					}
+				});
+
+				expect(Jodit.defaultOptions.createAttributes.div.class).eq(
+					'test-class'
+				);
+				expect(Jodit.defaultOptions.createAttributes.table).eq(
+					origTable
+				);
+
+				// cleanup
+				delete Jodit.defaultOptions.createAttributes.div;
+			});
+
+			it('Should affect new editor instances created after configure', () => {
+				Jodit.configure({
+					controls: {
+						testConfigureBtn2: {
+							icon: 'check',
+							tooltip: 'Test'
+						}
+					}
+				});
+
+				const editor = getJodit();
+				expect(editor.o.controls.testConfigureBtn2.icon).eq('check');
+				editor.destruct();
+			});
+
+			it('Should apply configured createAttributes to elements created by the editor', () => {
+				Jodit.configure({
+					createAttributes: {
+						div: { class: 'configured-class' }
+					}
+				});
+
+				const editor = getJodit();
+				const div = editor.createInside.div();
+				expect(div.className).eq('configured-class');
+
+				// existing table default should still work
+				const table = editor.createInside.element('table');
+				expect(table.style.borderCollapse).eq('collapse');
+
+				editor.destruct();
+				delete Jodit.defaultOptions.createAttributes.div;
+			});
+
+			it('Should merge configure with per-instance options via prototype chain', () => {
+				Jodit.configure({
+					controls: {
+						testMergeBtn: {
+							icon: 'pencil',
+							command: 'selectall',
+							tooltip: 'Global tooltip'
+						}
+					}
+				});
+
+				// Per-instance option overrides only icon, rest comes from defaults
+				const editor = getJodit({
+					controls: {
+						testMergeBtn: {
+							icon: 'bold'
+						}
+					}
+				});
+
+				expect(editor.o.controls.testMergeBtn.icon).eq('bold');
+				expect(editor.o.controls.testMergeBtn.command).eq('selectall');
+				expect(editor.o.controls.testMergeBtn.tooltip).eq(
+					'Global tooltip'
+				);
+
+				// Built-in controls should still be accessible
+				expect(editor.o.controls.bold).not.eq(undefined);
+
+				editor.destruct();
+			});
+		});
 	});
 });

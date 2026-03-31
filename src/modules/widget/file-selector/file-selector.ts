@@ -118,24 +118,25 @@ export const FileSelectorWidget = (
 
 	if (callbacks.url) {
 		const button = new UIButton(editor, {
-				type: 'submit',
-				variant: 'primary',
-				text: 'Insert'
+			type: 'submit',
+			variant: 'primary',
+			text: 'Insert'
+		});
+
+		const form = new UIForm(editor, [
+			new UIInput(editor, {
+				required: true,
+				label: 'URL',
+				name: 'url',
+				type: 'text',
+				placeholder: 'https://'
 			}),
-			form = new UIForm(editor, [
-				new UIInput(editor, {
-					required: true,
-					label: 'URL',
-					name: 'url',
-					type: 'text',
-					placeholder: 'https://'
-				}),
-				new UIInput(editor, {
-					name: 'text',
-					label: 'Alternative text'
-				}),
-				new UIBlock(editor, [button])
-			]);
+			new UIInput(editor, {
+				name: 'text',
+				label: 'Alternative text'
+			}),
+			new UIBlock(editor, [button])
+		]);
 
 		currentImage = null;
 
