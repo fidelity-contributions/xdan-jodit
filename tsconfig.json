@@ -38,6 +38,7 @@
 
 		"lib": ["esnext", "DOM", "scripthost", "es2015.iterable"],
 
+		"rootDir": "./src",
 		"baseUrl": ".",
 		"paths": {
 			"jodit/*": ["./src/*"]
