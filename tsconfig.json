@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		"ignoreDeprecations": "6.0",
 		"target": "es5",
 		"module": "es2020",
 		"moduleResolution": "node",
@@ -40,7 +41,8 @@
 		"baseUrl": ".",
 		"paths": {
 			"jodit/*": ["./src/*"]
-		}
+		},
+		"types": ["node", "@types/ace"]
 	},
 	"exclude": ["tools/**/*"],
 	"files": ["./src/index.ts", "./src/polyfills.ts", "./src/typings.d.ts", "./index.d.ts"]

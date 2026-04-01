@@ -9,7 +9,7 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
-## 4.11.16
+## 4.12.0
 
 #### :rocket: New Feature
 
@@ -30,6 +30,14 @@
     }
   });
   ```
+
+#### :house: Internal
+
+- Upgrade TypeScript from 5.9 to 6.0
+- Replace `ts-node` with `tsx` for running TypeScript tooling scripts
+- Add `ignoreDeprecations: "6.0"` to tsconfig files for TS 6 compatibility
+- Add `declare module '*.less'` for TS 6 stricter side-effect import checks
+- Fix `--update-snapshots` flag not being passed to Playwright in `make screenshots-update`
 
 ## 4.11.15
 

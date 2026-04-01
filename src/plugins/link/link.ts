@@ -147,15 +147,15 @@ export class link extends Plugin {
 	): HTMLElement | IUIForm {
 		const { jodit } = this;
 
-		const i18n = jodit.i18n.bind(jodit),
-			{
-				openInNewTabCheckbox,
-				openInNewTabCheckboxDefaultChecked,
-				noFollowCheckbox,
-				formTemplate,
-				formClassName,
-				modeClassName
-			} = jodit.o.link;
+		const i18n = jodit.i18n.bind(jodit);
+		const {
+			openInNewTabCheckbox,
+			openInNewTabCheckboxDefaultChecked,
+			noFollowCheckbox,
+			formTemplate,
+			formClassName,
+			modeClassName
+		} = jodit.o.link;
 
 		const html = formTemplate(jodit);
 		const form = isString(html)

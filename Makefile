@@ -36,10 +36,9 @@ OPEN_URL := ''
 LINT_FOLDERS := ./src/ ./test/ ./tools
 CHANGELOG_URL := https://github.com/xdan/jodit/blob/main/CHANGELOG.md
 NODE_MODULES_BIN := ./node_modules/.bin
-TS_NODE_BASE := $(NODE_MODULES_BIN)/ts-node --project $(cwd)tools/tsconfig.json
-TSX_BASE := $(NODE_MODULES_BIN)/tsx
+TS_NODE_BASE := $(NODE_MODULES_BIN)/tsx
 WEBPACK := $(TS_NODE_BASE) $(NODE_MODULES_BIN)/webpack
-KARMA := @TS_NODE_TRANSPILE_ONLY=true $(TS_NODE_BASE) $(NODE_MODULES_BIN)/karma start
+KARMA := @$(TS_NODE_BASE) $(NODE_MODULES_BIN)/karma start
 
 .PHONY: update
 update:
@@ -68,7 +67,7 @@ start dev love:
 
 .PHONY: build
 build:
-	@TS_NODE_TRANSPILE_ONLY=true $(WEBPACK) $(if $(watch), watch, --progress) --mode production \
+	@$(WEBPACK) $(if $(watch), watch, --progress) --mode production \
 		$(if $(watch),, --env stat=true) \
 		--env es=$(es) \
 		--env uglify=$(uglify) \
@@ -179,7 +178,7 @@ endif
 .PHONY: check-esm-build
 check-esm-build:
 	@echo 'Check esm modules ...'
-	@PLUGINS_COUNT=$(pluginsCount) $(TSX_BASE) $(cwd)/tools/check-esm-build.ts
+	@PLUGINS_COUNT=$(pluginsCount) $(TS_NODE_BASE) $(cwd)/tools/check-esm-build.ts
 
 .PHONY: build-all
 build-all:
