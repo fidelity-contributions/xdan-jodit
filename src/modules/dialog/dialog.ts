@@ -726,7 +726,13 @@ export class Dialog extends ViewWithToolbar implements IDialog {
 		 * It called after the window is closed
 		 */
 		e.fire(this, 'afterClose');
-		e.fire(this.ow, 'joditCloseDialog');
+
+		// An `afterClose` handler may destruct the dialog (a common pattern for
+		// one-shot dialogs); after `destruct` the `ow` reference is gone and
+		// firing on it would throw 'Need subject'.
+		if (!this.isInDestruct) {
+			e.fire(this.ow, 'joditCloseDialog');
+		}
 
 		if (this.destroyAfterClose) {
 			this.destruct();

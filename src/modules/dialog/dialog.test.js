@@ -98,6 +98,24 @@ describe('Dialog system tests', function () {
 		});
 	});
 
+	describe('Destruct from afterClose', function () {
+		// A one-shot dialog that destructs itself in `afterClose` must not
+		// break `close()` — it still fires 'joditCloseDialog' afterwards.
+		it('Should not throw when a handler destructs the dialog', function () {
+			const editor = getJodit();
+			const dialog = editor.dlg();
+			dialog.setContent('<div>test</div>');
+			dialog.open();
+
+			dialog.e.on(dialog, 'afterClose', () => {
+				dialog.destruct();
+			});
+
+			expect(() => dialog.close()).does.not.throw();
+			expect(dialog.isInDestruct).is.true;
+		});
+	});
+
 	describe('About dialog', function () {
 		it('Should be opened when use clicks on the About button', function () {
 			getBox().style.width = '100%';

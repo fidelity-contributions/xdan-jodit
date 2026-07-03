@@ -9,6 +9,27 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.12.34
+
+#### :rocket: New Feature
+
+- **Image editor / `openImageEditor` save contract**: `ImageEditorActionBox.action` now also accepts `'saved'` (plus an optional `newPath`). A replacement image editor (e.g. the Jodit PRO one, which uploads the fully edited blob itself through the connector's `imageSave` action) can report "the file is already persisted" — the core then skips the server `resize`/`crop` request and only runs the success wiring (file browser refresh, in-content `<img>` swap via `onSuccess(newPath)`). Previously every save was forced through `dataProvider.resize`/`crop`, which produced a redundant request that could 404 ("Source not found") when the editor was opened from the Image properties dialog.
+
+#### :bug: Bug Fix
+
+- **Dialog**: destructing a dialog from its own `afterClose` handler (a common pattern for one-shot dialogs, e.g. the finder preview lightbox) made `close()` throw `TypeError: Need subject` — after the handler ran, `close()` still fired `joditCloseDialog` on `this.ow`, which the destructor had already cleared. `close()` now skips that fire when the dialog is being destructed.
+
+## 4.12.33
+
+#### :bug: Bug Fix
+
+- **Image properties / edit remote image**: when downloading an external image to the host failed, the alert displayed the raw template `There was an error loading %s` — the error message was passed as `alert`'s second argument (the callback slot) instead of being substituted into the placeholder. The message is now formatted through `i18n('There was an error loading %s', error.message)`, so the alert shows the actual (translated) error.
+
+#### :house: Internal
+
+- **ESM build**: `@jodit/image-editor` added to the `allowPackages` allowlist of the alias-imports resolver, so the ESM build keeps the package as an external import — groundwork for the Jodit PRO image editor built on it.
+- **Image editor tests**: expanded crop/resize scenarios (with and without aspect ratio) and new acceptance tests for the `afterImageEditorSave` event (correct `action`/`box` payload on Save / Save as).
+
 ## 4.12.32
 
 #### :bug: Bug Fix

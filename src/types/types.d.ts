@@ -273,8 +273,15 @@ export interface ImageBox {
 }
 
 export interface ImageEditorActionBox {
-	action: ImageAction;
+	/**
+	 * `'saved'` means the editor already persisted the file itself (e.g. the
+	 * PRO image editor uploads the edited blob through the connector): the
+	 * server resize/crop must be skipped and only the success wiring run.
+	 */
+	action: ImageAction | 'saved';
 	box: ImageBox;
+	/** New path of the already-saved file (used with `action: 'saved'`). */
+	newPath?: string;
 }
 
 export interface EventHandlerBlock {

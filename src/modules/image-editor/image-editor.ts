@@ -841,7 +841,21 @@ export function openImageEditor(
 			box: ImageEditorActionBox,
 			success: () => void,
 			failed: (error: Error) => void
-		) =>
+		) => {
+			// The file was already persisted by the editor itself (PRO uploads
+			// the edited blob through the connector): skip the server
+			// resize/crop and only run the success wiring (file browser
+			// refresh, in-content <img> swap).
+			if (box.action === 'saved') {
+				success();
+
+				if (onSuccess) {
+					onSuccess(box.newPath);
+				}
+
+				return;
+			}
+
 			call(
 				box.action === 'resize'
 					? this.dataProvider.resize
@@ -869,6 +883,7 @@ export function openImageEditor(
 					if (onFailed) {
 						onFailed(error);
 					}
-				})
+				});
+		}
 	);
 }

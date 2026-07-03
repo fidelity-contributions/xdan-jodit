@@ -607,5 +607,81 @@
 				}).timeout(7000);
 			});
 		});
+
+		describe('Already saved action', () => {
+			// The PRO editor persists the edited file itself and reports
+			// `action: 'saved'` — the core must not call the server
+			// resize/crop and must run the success wiring directly.
+			it('Should skip the server resize/crop for action "saved"', async () => {
+				unmockPromise();
+
+				const area = appendTestArea();
+				const editor = Jodit.make(area, {
+					history: { timeout: 0 },
+					filebrowser: {
+						ajax: {
+							url: 'https://xdsoft.net/jodit/connector/index.php'
+						}
+					},
+					disablePlugins: 'mobile'
+				});
+
+				const fb = editor.filebrowser;
+
+				let serverCalled = false;
+				fb.dataProvider.resize = () => {
+					serverCalled = true;
+					return Promise.resolve(true);
+				};
+				fb.dataProvider.crop = () => {
+					serverCalled = true;
+					return Promise.resolve(true);
+				};
+				fb.dataProvider.getPathByUrl = () =>
+					Promise.resolve({
+						name: 'th.jpg',
+						path: '',
+						source: 'default'
+					});
+
+				editor.value =
+					'<img alt="" src="https://xdsoft.net/jodit/files/th.jpg">';
+
+				simulateEvent('dblclick', editor.editor.querySelector('img'));
+
+				const dialog = getOpenedDialog(editor);
+				expect(dialog).is.not.null;
+
+				const form = getForm(dialog);
+				simulateEvent('click', form.getElm('editImage'));
+
+				await new Promise(resolve =>
+					fb.e.one('afterImageEditor', resolve)
+				);
+
+				const imageEditor = fb.getInstance('ImageEditor', fb.o);
+
+				let succeeded = false;
+
+				await new Promise((resolve, reject) => {
+					imageEditor.onSave(
+						undefined,
+						{
+							action: 'saved',
+							box: { w: 10, h: 10 },
+							newPath: 'https://example.com/files/new.jpg'
+						},
+						() => {
+							succeeded = true;
+							resolve();
+						},
+						reject
+					);
+				});
+
+				expect(succeeded).is.true;
+				expect(serverCalled).is.false;
+			}).timeout(7000);
+		});
 	}
 );
