@@ -340,7 +340,7 @@ export class Ajax<T extends object = any> implements IAjax<T> {
 			const qIndex = url.indexOf('?');
 
 			if (qIndex !== -1) {
-				const urlData = parseQuery(url);
+				const urlData = parseQuery(url.substring(qIndex));
 
 				url =
 					url.substring(0, qIndex) +

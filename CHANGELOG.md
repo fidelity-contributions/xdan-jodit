@@ -9,6 +9,12 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.12.35
+
+#### :bug: Bug Fix
+
+- **Ajax / GET requests**: when a request URL already contained a query string (e.g. `filebrowser.ajax.url: '/connector/index.php?uid=123'`), `prepareRequest` corrupted it — `parseQuery` received the whole URL instead of just its query part, so the URL path was glued into the first parameter name (`index.php?connector%2Findex.php%3Fuid=123&...`) and the baked-in parameters were duplicated instead of being merged with (and overridden by) the request data. The query part is now extracted before parsing, so URL parameters merge cleanly and `data` keys take priority. Reported by a customer (EventSystemPro, Jodit Multi PRO).
+
 ## 4.12.34
 
 #### :rocket: New Feature

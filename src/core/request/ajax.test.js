@@ -17,6 +17,55 @@ describe('Ajax module', () => {
 		});
 	});
 
+	describe('prepareRequest', () => {
+		it('Should append data to the URL for GET requests', () => {
+			const ajax = new Jodit.modules.Ajax({
+				url: '/jodit-connector/index.php',
+				method: 'GET',
+				data: { action: 'files', source: 'default', path: '/' }
+			});
+
+			const request = ajax.prepareRequest();
+
+			expect(request.url).equals(
+				'/jodit-connector/index.php?action=files&source=default&path=%2F'
+			);
+			ajax.destruct();
+		});
+
+		describe('URL already contains a query string', () => {
+			it('Should merge its parameters with data without corrupting the URL', () => {
+				const ajax = new Jodit.modules.Ajax({
+					url: '/jodit-connector/index.php?uid=123&source=images',
+					method: 'GET',
+					data: { action: 'files', path: '/' }
+				});
+
+				const request = ajax.prepareRequest();
+
+				expect(request.url).equals(
+					'/jodit-connector/index.php?uid=123&source=images&action=files&path=%2F'
+				);
+				ajax.destruct();
+			});
+
+			it('Should give priority to data over the URL parameters with the same name', () => {
+				const ajax = new Jodit.modules.Ajax({
+					url: '/jodit-connector/index.php?action=permissions&source=images',
+					method: 'GET',
+					data: { action: 'files', source: 'files' }
+				});
+
+				const request = ajax.prepareRequest();
+
+				expect(request.url).equals(
+					'/jodit-connector/index.php?action=files&source=files'
+				);
+				ajax.destruct();
+			});
+		});
+	});
+
 	describe('stream', () => {
 		/**
 		 * Creates a mock XHR that delivers SSE text in chunks via onprogress,
