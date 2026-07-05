@@ -1243,7 +1243,7 @@ describe('Edit image tests', () => {
 		describe('No available classes defined', () => {
 			it('Should render as input box', async () => {
 				const refs = await openImagePropertiesDialog(
-					'<p><img alt="" src="https://xdsoft.net/jodit/files/th.jpg"></p>',
+					'<p><img alt="" src="tests/artio.jpg"></p>',
 					{
 						history: {
 							timeout: 0
@@ -1263,7 +1263,7 @@ describe('Edit image tests', () => {
 		describe('Available classes defined', () => {
 			it('Should render as select box', async () => {
 				const refs = await openImagePropertiesDialog(
-					'<p><img alt="" src="https://xdsoft.net/jodit/files/th.jpg"/></p>',
+					'<p><img alt="" src="tests/artio.jpg"/></p>',
 					{
 						history: {
 							timeout: 0
@@ -1302,7 +1302,7 @@ describe('Edit image tests', () => {
 		describe('Opened dialog image', () => {
 			it('Should disable margin inputs for left, bottom, right if element has equals margins(margin:10px;)', async () => {
 				const refs = await openImagePropertiesDialog(
-					'<p><img alt="111" src="https://xdsoft.net/jodit/files/artio.jpg" style="margin:10px;border:1px solid red;width:100px;height:100px;"/></p>',
+					'<p><img alt="111" src="tests/artio.jpg" style="margin:10px;border:1px solid red;width:100px;height:100px;"/></p>',
 					{
 						history: {
 							timeout: 0
@@ -1319,7 +1319,7 @@ describe('Edit image tests', () => {
 
 			it('Should enable margin inputs for left, bottom, right if element has not equals margins(margin:10px 5px;)', async () => {
 				const refs = await openImagePropertiesDialog(
-					'<p><img alt="artio" src="https://xdsoft.net/jodit/files/artio.jpg" style="margin:10px 5px;border:1px solid red;width:100px;height:100px;"/></p>',
+					'<p><img alt="artio" src="tests/artio.jpg" style="margin:10px 5px;border:1px solid red;width:100px;height:100px;"/></p>',
 					{
 						history: {
 							timeout: 0

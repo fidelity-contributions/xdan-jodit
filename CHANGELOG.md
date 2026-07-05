@@ -9,6 +9,28 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.12.36
+
+#### :bug: Bug Fix
+
+- **Lists / `enter: 'br'` mode**: converting a list type (`ul ↔ ol`, or applying a class/style that forces the REPLACE path) destroyed the list — `unwrapList` extracted the `li` content into a `DocumentFragment` that was dissolved on insertion, so `wrapList` received an empty detached node and the new `<ol>`/`<ul>` was never inserted into the document; the content was left as bare inline nodes. In the REPLACE path the `li` now stays in the document and is re-wrapped directly.
+- **commitStyle / attributes**: a `number`/`boolean` attribute value (e.g. `commitStyle({ element: 'a', attributes: { tabindex: 2 } })`) could never be toggled off — the `attr()` getter returns a string, so the strict comparison against the raw value always failed and every re-apply took the CHANGE branch instead of UNSET. The value is normalized to a string before comparison now.
+- **Selection**: `cursorInTheEdge()` (and its `cursorOnTheLeft`/`cursorOnTheRight` wrappers) threw `IndexSizeError` when the document had no selection ranges — `getRangeAt(0)` was called without checking `rangeCount`. It returns `null` now, as documented.
+- **Selection**: `eachSelection()` threw `TypeError` when the selection root was an empty editor (`childNodes[-1]` produced an `undefined` start node).
+- **Dom.isFragment**: fragments belonging to an inert document (`template.content`, `DOMParser` output) were not recognized because of a stale `defaultView` requirement — same class of problem already fixed for `Dom.isElement` earlier.
+- **Dom.between**: when `end` was an ancestor of `start`, the ascent skipped over it and the callback kept firing for nodes far outside the intended range, up to the end of the tree.
+- **Dom.replaceTemporaryFromString**: the regular expression hardcoded the `data-jodit-temp` attribute name instead of using the `TEMP_ATTR` constant and did not match a temporary element whose marker attribute has no value (`<span data-jodit-temp>`).
+- **LazyWalker**: stopping a walk did not really cancel it — `stop()` called `cancelIdleCallback` with an id that was never assigned (dead code left from the pre-`scheduler.postTask` implementation) and the scheduler's `AbortController` was never aborted. Also, `setWork()` called before the first chunk had started did not cancel the previously scheduled pass. Repeated `setWork()` calls (the `clean-html` plugin does this on every change) piled up concurrent loops pumping the same generator, defeating the chunked-walk throttling. The pending task is now aborted in `stop()`.
+- **LazyWalker**: the `affect` flag was not reset when a pass was interrupted via `break()`, so the next pass reported `end(affect = true)` even if it had not changed anything (a false `synchronizeValues` trigger for `clean-html`). It also processed `timeoutChunkSize + 1` nodes per chunk instead of the configured size.
+
+#### :house: Internal
+
+- **Dom**: the `Dom.replace(elm, 'p')` overload without a `create` instance is removed from the type surface — it always failed at runtime on an assertion (`Need create instance for new tag`); `create` is now required whenever the replacement is defined by a tag name or an HTML string. `Dom.isList` is honestly typed as `HTMLUListElement | HTMLOListElement`, `Dom.isComment` accepts `Nullable<Node>`, `isSameAttributes` no longer pretends to be a type predicate, `CommitStyle.isApplied` returns a real boolean.
+- **Dom**: `nextGen` builds its sibling stack with `push` + `reverse` instead of `unshift` in a loop (was O(n²) on wide sibling lists); `isTag` computes the upper-case tag name lazily; the temporary-element regexp is compiled once at the module level.
+- **Docs**: fixed the misleading/inverted JSDoc for `Dom.between`, `Dom.up` (root-check asymmetry), `Dom.safeInsertNode`, `LazyWalker` options and events, `cursorInTheEdgeOfString`, `isSuitElement` (`strictStyle` description was inverted), the `LazyWalker` example in the DOM module README (options object, not a number), and the `Dom.replace` example (missing `create` argument).
+- **Tests**: new coverage for `Dom.between`, `Dom.isFragment` (inert documents), `Dom.replace`, `Dom.replaceTemporaryFromString`, wide sibling traversal order in `Dom.find`, `LazyWalker` restart/affect-flag reset, `cursorInTheEdge` without a selection, `eachSelection` on an empty editor, `ul → ol` conversion in `enter: 'br'` mode, and toggling a numeric attribute via `commitStyle`.
+- **Tests / hermetic images**: the resize, image-editor and image-properties karma tests that wait for a real image load no longer fetch `https://xdsoft.net/jodit/files/artio.jpg`/`th.jpg` from the live server — they use the byte-identical `tests/artio.jpg` already served by karma, so a slow or unreachable xdsoft.net can't time these tests out anymore (~17 tests were flaking on degraded networks). The `onLoadImage` test helper now also rejects with a clear `failed to load "<src>"` message on an image `error` event instead of hanging until the mocha timeout.
+
 ## 4.12.35
 
 #### :bug: Bug Fix

@@ -110,7 +110,7 @@ describe('Resize plugin', () => {
 					'<div style="width:800px; margin:auto; border:1px solid red;">\n' +
 					'        wrong image selection\n' +
 					'        <div style="position:relative;text-align: left">\n' +
-					'            <textarea id="text__area0"> <img src="https://xdsoft.net/jodit/files/artio.jpg" style="border:1px solid red;width:100px;height:100px;"/></textarea>\n' +
+					'            <textarea id="text__area0"> <img src="tests/artio.jpg" style="border:1px solid red;width:100px;height:100px;"/></textarea>\n' +
 					'        </div>\n' +
 					'    </div>';
 
@@ -144,7 +144,7 @@ describe('Resize plugin', () => {
 					'<div style="width:800px; margin:auto; border:1px solid red;">\n' +
 					'        wrong image selection\n' +
 					'        <div style="position:relative;text-align: left">\n' +
-					'            <textarea id="text__area1"> &lt;img src="https://xdsoft.net/jodit/files/artio.jpg" style="border:1px solid red;width:100px;height:100px;"/&gt;</textarea>\n' +
+					'            <textarea id="text__area1"> &lt;img src="tests/artio.jpg" style="border:1px solid red;width:100px;height:100px;"/&gt;</textarea>\n' +
 					'        </div>\n' +
 					'    </div>';
 
@@ -356,7 +356,7 @@ describe('Resize plugin', () => {
 							});
 
 							editor.value =
-								'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="width: 301px;"/></p>';
+								'<p><img src="tests/artio.jpg" style="width: 301px;"/></p>';
 
 							await onLoadImage(
 								editor.editor.querySelector('img')
@@ -364,7 +364,7 @@ describe('Resize plugin', () => {
 							resizeImage(editor);
 
 							expect(sortAttributes(editor.value)).eq(
-								'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="height:159px;width:311px"></p>'
+								'<p><img src="tests/artio.jpg" style="height:159px;width:311px"></p>'
 							);
 						});
 
@@ -373,7 +373,7 @@ describe('Resize plugin', () => {
 								const editor = getJodit();
 
 								editor.value =
-									'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="width: 301px;"/></p>';
+									'<p><img src="tests/artio.jpg" style="width: 301px;"/></p>';
 
 								await onLoadImage(
 									editor.editor.querySelector('img')
@@ -383,7 +383,7 @@ describe('Resize plugin', () => {
 								resizeImage(editor);
 
 								expect(sortAttributes(editor.value)).eq(
-									'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="height:159px;width:311px"></p>'
+									'<p><img src="tests/artio.jpg" style="height:159px;width:311px"></p>'
 								);
 							});
 						});
@@ -398,7 +398,7 @@ describe('Resize plugin', () => {
 							});
 
 							editor.value =
-								'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="width: 301px;"/></p>';
+								'<p><img src="tests/artio.jpg" style="width: 301px;"/></p>';
 
 							await onLoadImage(
 								editor.editor.querySelector('img')
@@ -407,7 +407,7 @@ describe('Resize plugin', () => {
 							resizeImage(editor);
 
 							expect(sortAttributes(editor.value)).eq(
-								'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="height:159px;width:311px"></p>'
+								'<p><img src="tests/artio.jpg" style="height:159px;width:311px"></p>'
 							);
 						});
 					});
@@ -421,7 +421,7 @@ describe('Resize plugin', () => {
 							});
 
 							editor.value =
-								'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="width: 301px;"/></p>';
+								'<p><img src="tests/artio.jpg" style="width: 301px;"/></p>';
 
 							await onLoadImage(
 								editor.editor.querySelector('img')
@@ -430,7 +430,7 @@ describe('Resize plugin', () => {
 							resizeImage(editor);
 
 							expect(sortAttributes(editor.value)).eq(
-								'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="height:175px;width:311px"></p>'
+								'<p><img src="tests/artio.jpg" style="height:175px;width:311px"></p>'
 							);
 						});
 					});
@@ -446,7 +446,7 @@ describe('Resize plugin', () => {
 							});
 
 							editor.value =
-								'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="width: 301px;"/></p>';
+								'<p><img src="tests/artio.jpg" style="width: 301px;"/></p>';
 
 							await onLoadImage(
 								editor.editor.querySelector('img')
@@ -454,7 +454,7 @@ describe('Resize plugin', () => {
 							resizeImage(editor);
 
 							expect(sortAttributes(editor.value)).eq(
-								'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="height:175px;width:311px"></p>'
+								'<p><img src="tests/artio.jpg" style="height:175px;width:311px"></p>'
 							);
 						});
 					});
@@ -472,7 +472,7 @@ describe('Resize plugin', () => {
 								});
 
 								editor.value =
-									'<p><img src="https://xdsoft.net/jodit/files/artio.jpg"/></p>';
+									'<p><img src="tests/artio.jpg"/></p>';
 
 								await onLoadImage(
 									editor.editor.querySelector('img')
@@ -480,7 +480,7 @@ describe('Resize plugin', () => {
 								resizeImage(editor);
 
 								expect(sortAttributes(editor.value)).eq(
-									'<p><img height="287" src="https://xdsoft.net/jodit/files/artio.jpg" width="510"></p>'
+									'<p><img height="287" src="tests/artio.jpg" width="510"></p>'
 								);
 							});
 						});
@@ -498,7 +498,7 @@ describe('Resize plugin', () => {
 									});
 
 									editor.value =
-										'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="width:300px"/></p>';
+										'<p><img src="tests/artio.jpg" style="width:300px"/></p>';
 
 									await onLoadImage(
 										editor.editor.querySelector('img')
@@ -507,7 +507,7 @@ describe('Resize plugin', () => {
 									resizeImage(editor);
 
 									expect(sortAttributes(editor.value)).eq(
-										'<p><img height="175" src="https://xdsoft.net/jodit/files/artio.jpg" style="width:310px" width="310"></p>'
+										'<p><img height="175" src="tests/artio.jpg" style="width:310px" width="310"></p>'
 									);
 								});
 							});
@@ -524,7 +524,7 @@ describe('Resize plugin', () => {
 									});
 
 									editor.value =
-										'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="height:300px"/></p>';
+										'<p><img src="tests/artio.jpg" style="height:300px"/></p>';
 
 									await onLoadImage(
 										editor.editor.querySelector('img')
@@ -533,7 +533,7 @@ describe('Resize plugin', () => {
 									resizeImage(editor);
 
 									expect(sortAttributes(editor.value)).eq(
-										'<p><img height="306" src="https://xdsoft.net/jodit/files/artio.jpg" style="height:306px" width="544"></p>'
+										'<p><img height="306" src="tests/artio.jpg" style="height:306px" width="544"></p>'
 									);
 								});
 							});
@@ -550,7 +550,7 @@ describe('Resize plugin', () => {
 									});
 
 									editor.value =
-										'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="width:300px;height:300px"/></p>';
+										'<p><img src="tests/artio.jpg" style="width:300px;height:300px"/></p>';
 
 									await onLoadImage(
 										editor.editor.querySelector('img')
@@ -559,7 +559,7 @@ describe('Resize plugin', () => {
 									resizeImage(editor);
 
 									expect(sortAttributes(editor.value)).eq(
-										'<p><img height="310" src="https://xdsoft.net/jodit/files/artio.jpg" style="height:310px;width:310px" width="310"></p>'
+										'<p><img height="310" src="tests/artio.jpg" style="height:310px;width:310px" width="310"></p>'
 									);
 								});
 							});
@@ -572,14 +572,14 @@ describe('Resize plugin', () => {
 				getBox().style.width = '600px';
 				const editor = getJodit();
 				const image = new Image();
-				image.src = 'https://xdsoft.net/jodit/files/artio.jpg';
+				image.src = 'tests/artio.jpg';
 
 				await onLoadImage(image);
 
 				const ratio = image.naturalWidth / image.naturalHeight;
 
 				editor.value =
-					'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="width:500px;height: 281px;"/></p>';
+					'<p><img src="tests/artio.jpg" style="width:500px;height: 281px;"/></p>';
 				const img = editor.editor.querySelector('img');
 				await onLoadImage(img);
 

@@ -33,8 +33,7 @@
 						disablePlugins: 'mobile'
 					});
 
-					editor.value =
-						'<img alt="" src="https://xdsoft.net/jodit/files/th.jpg">';
+					editor.value = '<img alt="" src="tests/artio.jpg">';
 
 					simulateEvent(
 						'dblclick',
@@ -146,8 +145,7 @@
 						}
 					});
 
-					editor.value =
-						'<img alt="" src="https://xdsoft.net/jodit/files/th.jpg">';
+					editor.value = '<img alt="" src="tests/artio.jpg">';
 
 					simulateEvent(
 						'dblclick',
@@ -644,8 +642,7 @@
 						source: 'default'
 					});
 
-				editor.value =
-					'<img alt="" src="https://xdsoft.net/jodit/files/th.jpg">';
+				editor.value = '<img alt="" src="tests/artio.jpg">';
 
 				simulateEvent('dblclick', editor.editor.querySelector('img'));
 

@@ -1267,11 +1267,21 @@ function one(event, element, callback) {
  * @param {Function} callback
  */
 function onLoadImage(image, callback = () => {}) {
-	return new naturalPromise(resolve => {
+	return new naturalPromise((resolve, reject) => {
 		if (!image.complete) {
 			one('load', image, () => {
 				callback.call(image);
 				resolve();
+			});
+
+			// fail fast with a clear message instead of hanging until
+			// the mocha timeout
+			one('error', image, () => {
+				const error = new Error(
+					'onLoadImage: failed to load "' + image.src + '"'
+				);
+				console.warn(error.message);
+				reject(error);
 			});
 		} else {
 			callback.call(image);
