@@ -115,6 +115,11 @@ export function getContainer<T extends HTMLTagNames = HTMLTagNames>(
 			className: `jodit jodit-${kebabCase(name)}-container jodit-box`
 		});
 
+		// Let a strict CSP accept the injected <style>/<script> box
+		if (view.o.nonce && (tag === 'style' || tag === 'script')) {
+			box.setAttribute('nonce', view.o.nonce);
+		}
+
 		box.classList.add(`jodit_theme_${view.o.theme || 'default'}`);
 
 		body.appendChild(box);

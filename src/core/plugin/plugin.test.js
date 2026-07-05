@@ -380,4 +380,57 @@ describe('Plugin system test', () => {
 			});
 		});
 	});
+
+	// https://github.com/xdan/jodit/issues/1276
+	describe('CSP nonce', () => {
+		afterEach(() => {
+			Jodit.plugins.remove('nonceStyled');
+		});
+
+		it('should put the nonce on the injected plugin <style> element', () => {
+			Jodit.plugins.add(
+				'nonceStyled',
+				class extends Jodit.modules.Plugin {
+					styles = '.jodit-nonce-probe{color:red}';
+					afterInit() {}
+					beforeDestruct() {}
+				}
+			);
+
+			const editor = getJodit({
+				nonce: 'test-nonce-123'
+			});
+
+			const styleBox = editor.ownerDocument.querySelector(
+				'style.jodit-nonce-styled-container'
+			);
+
+			expect(styleBox).is.not.null;
+			expect(styleBox.getAttribute('nonce')).equals('test-nonce-123');
+
+			editor.destruct();
+		});
+
+		it('should not set a nonce attribute when the option is empty', () => {
+			Jodit.plugins.add(
+				'nonceStyled',
+				class extends Jodit.modules.Plugin {
+					styles = '.jodit-nonce-probe{color:red}';
+					afterInit() {}
+					beforeDestruct() {}
+				}
+			);
+
+			const editor = getJodit();
+
+			const styleBox = editor.ownerDocument.querySelector(
+				'style.jodit-nonce-styled-container'
+			);
+
+			expect(styleBox).is.not.null;
+			expect(styleBox.hasAttribute('nonce')).is.false;
+
+			editor.destruct();
+		});
+	});
 });

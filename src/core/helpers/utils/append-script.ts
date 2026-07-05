@@ -49,6 +49,10 @@ export const appendScriptAsync = cacheLoaders(
 				src: completeUrl(url)
 			});
 
+			if (jodit.o.nonce) {
+				script.setAttribute('nonce', jodit.o.nonce);
+			}
+
 			jodit.e.one(script, 'error', reject).one(script, 'load', resolve);
 			jodit.od.body.appendChild(script);
 		});
@@ -70,6 +74,10 @@ export const appendStyleAsync = cacheLoaders(
 			link.rel = 'stylesheet';
 			link.media = 'all';
 			link.crossOrigin = 'anonymous';
+
+			if (jodit.o.nonce) {
+				link.setAttribute('nonce', jodit.o.nonce);
+			}
 
 			const callback = (): void => resolve(link);
 

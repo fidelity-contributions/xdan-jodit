@@ -319,6 +319,21 @@ class Config implements IViewOptions {
 	shadowRoot: Nullable<ShadowRoot> = null;
 
 	/**
+	 * CSP nonce applied to every `<style>`, `<script>` and `<link>` element
+	 * Jodit injects at runtime (plugin styles, CDN scripts for ACE/beautify,
+	 * downloaded stylesheets). Set it to the same nonce your server puts in the
+	 * `Content-Security-Policy` header so a strict `style-src`/`script-src`
+	 * policy does not block the editor.
+	 *
+	 * ```js
+	 * Jodit.make('#editor', {
+	 * 	nonce: 'r4nd0m'
+	 * });
+	 * ```
+	 */
+	nonce: string = '';
+
+	/**
 	 * Base CSS `z-index` for the editor UI (toolbar, popups, dialogs).
 	 * Set to a higher value when other page elements overlap the editor.
 	 * `0` means no explicit z-index is applied.

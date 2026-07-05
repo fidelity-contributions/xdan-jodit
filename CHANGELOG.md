@@ -9,6 +9,16 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.12.38
+
+#### :rocket: New Feature
+
+- **CSP `nonce` support**: added a `nonce` option that is applied to every `<style>`, `<script>` and `<link>` element Jodit injects at runtime (plugin styles, CDN scripts for ACE/beautify, downloaded stylesheets). Setting it to the nonce from your `Content-Security-Policy` header lets the editor run under a strict `style-src`/`script-src` policy without `'unsafe-inline'`. Requested in [#1276](https://github.com/xdan/jodit/issues/1276).
+
+  ```js
+  Jodit.make('#editor', { nonce: 'r4nd0m' });
+  ```
+
 ## 4.12.37
 
 #### :bug: Bug Fix

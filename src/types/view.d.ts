@@ -102,6 +102,13 @@ interface IViewOptions extends ILanguageOptions, IToolbarOptions {
 
 	shadowRoot?: Nullable<ShadowRoot>;
 
+	/**
+	 * CSP nonce applied to every `<style>`/`<script>`/`<link>` element Jodit
+	 * injects at runtime, so a strict `style-src`/`script-src` policy does not
+	 * block them.
+	 */
+	nonce?: string;
+
 	popupRoot?: Nullable<HTMLElement>;
 
 	ownerWindow?: Window;
