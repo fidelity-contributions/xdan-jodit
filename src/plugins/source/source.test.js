@@ -183,6 +183,45 @@ describe('Source code test', function () {
 				});
 			}).timeout(6000);
 
+			// https://github.com/xdan/jodit/issues/1285
+			it('Should forward extra native ACE options like fontSize', function (done) {
+				unmockPromise();
+
+				const timeout = /*ok*/ setTimeout(function () {
+					done(new Error('Timeout error'));
+				}, 5000);
+
+				getJodit({
+					defaultMode: Jodit.MODE_SOURCE,
+					sourceEditor: 'ace',
+					sourceEditorNativeOptions: {
+						fontSize: '30px'
+					},
+					events: {
+						beforeDestruct: function () {
+							return false;
+						},
+						sourceEditorReady: function (editor) {
+							try {
+								const instance =
+									editor.__plugins.source.sourceEditor
+										.instance;
+
+								expect(instance.getOption('fontSize')).equals(
+									'30px'
+								);
+
+								done();
+							} catch (e) {
+								done(e);
+							} finally {
+								clearTimeout(timeout);
+							}
+						}
+					}
+				});
+			}).timeout(6000);
+
 			it('Should use a modern ACE build by default', function () {
 				const m = Jodit.defaultOptions.sourceEditorCDNUrlsJS[0].match(
 					/ace\/(\d+)\.(\d+)\.(\d+)\/ace\.js/

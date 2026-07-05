@@ -120,6 +120,12 @@ export class AceEditor
 				this.instance.setOption('rtl', true);
 			}
 
+			// Forward every native ACE option the user provided (theme,
+			// mode, fontSize, tabSize, …). Without this only the handful of
+			// keys explicitly wired below were applied and extras such as
+			// `fontSize` were silently ignored. See #1285
+			this.instance.setOptions(editor.o.sourceEditorNativeOptions);
+
 			this.instance.setTheme(editor.o.sourceEditorNativeOptions.theme);
 			this.instance.renderer.setShowGutter(
 				editor.o.sourceEditorNativeOptions.showGutter

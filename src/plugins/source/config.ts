@@ -24,15 +24,22 @@ declare module 'jodit/config' {
 		sourceEditor: 'area' | 'ace' | ((jodit: IJodit) => ISourceEditor);
 
 		/**
-		 * Options for [ace](https://ace.c9.io/#config) editor
+		 * Options for [ace](https://ace.c9.io/#config) editor.
+		 *
+		 * Besides the named keys below, any other native ACE option is
+		 * forwarded to `editor.setOptions()` as is, so e.g. `fontSize`,
+		 * `tabSize` or `useSoftTabs` work too.
 		 *
 		 * ```js
 		 * Jodit.make('#editor', {
-		 * 	showGutter: true,
-		 * 	theme: 'ace/theme/idle_fingers',
-		 * 	mode: 'ace/mode/html',
-		 * 	wrap: true,
-		 * 	highlightActiveLine: true
+		 * 	sourceEditorNativeOptions: {
+		 * 		showGutter: true,
+		 * 		theme: 'ace/theme/idle_fingers',
+		 * 		mode: 'ace/mode/html',
+		 * 		wrap: true,
+		 * 		highlightActiveLine: true,
+		 * 		fontSize: '16px'
+		 * 	}
 		 * })
 		 * ```
 		 */
@@ -42,6 +49,7 @@ declare module 'jodit/config' {
 			mode: string;
 			wrap: string | boolean | number;
 			highlightActiveLine: boolean;
+			[option: string]: string | boolean | number | undefined;
 		};
 
 		/**

@@ -9,6 +9,12 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.12.37
+
+#### :bug: Bug Fix
+
+- **Source mode / ACE options**: only a fixed set of `sourceEditorNativeOptions` (`theme`, `mode`, `wrap`, `showGutter`, `highlightActiveLine`) was applied to the ACE editor — any other native option, such as `fontSize`, `tabSize` or `useSoftTabs`, was silently dropped, so `sourceEditorNativeOptions: { fontSize: '30px' }` had no effect. The whole options object is now forwarded to ACE's `editor.setOptions()`, and the type accepts arbitrary native keys. Fixes [#1285](https://github.com/xdan/jodit/issues/1285).
+
 ## 4.12.36
 
 #### :bug: Bug Fix
