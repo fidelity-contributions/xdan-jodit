@@ -12,17 +12,15 @@ import { assert } from 'jodit/core/helpers/utils/assert';
 import { hasSameStyle } from './has-same-style';
 
 /**
- * Compares whether the given attributes match the element's own attributes
+ * Checks that every attribute from `attrs` is present on the element with
+ * the same value (one-directional match: extra own attributes of the element
+ * are ignored, empty `attrs` matches any element)
  * @private
  */
 export function isSameAttributes(
 	elm: HTMLElement,
 	attrs?: IDictionary
-): elm is HTMLElement {
-	if (!elm.attributes.length && !size(attrs)) {
-		return true;
-	}
-
+): boolean {
 	if (!size(attrs)) {
 		return true;
 	}

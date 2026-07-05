@@ -17,7 +17,8 @@ import { isNormalNode } from './is-normal-node';
  * @param commitStyle - style commit
  * @param elm - checked item
  * @param strict - strict mode - false - the default tag is suitable for us if it is also in the commit
- * @param strictStyle - strict style mode - true - the element has the same style keys as in the commit, but not their values
+ * @param strictStyle - strict style mode - true - the element must have the same style keys AND values
+ * as in the commit, false - matching style keys are enough
  * @private
  */
 export function isSuitElement(

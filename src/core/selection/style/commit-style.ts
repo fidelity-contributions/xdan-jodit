@@ -30,7 +30,7 @@ export class CommitStyle implements ICommitStyle {
 			return false;
 		}
 
-		return data[key];
+		return Boolean(data[key]);
 	}
 
 	setApplied(elm: HTMLElement, key: string): void {
@@ -50,7 +50,7 @@ export class CommitStyle implements ICommitStyle {
 	}
 
 	/**
-	 * New element is blocked
+	 * New element is a block element
 	 */
 	get elementIsBlock(): boolean {
 		return Boolean(

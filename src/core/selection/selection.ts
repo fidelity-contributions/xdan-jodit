@@ -233,7 +233,7 @@ export class Selection implements ISelect {
 	 * Remove all markers
 	 */
 	removeMarkers(): void {
-		Dom.safeRemove.apply(null, this.markers);
+		Dom.safeRemove(...this.markers);
 	}
 
 	/**
@@ -327,6 +327,11 @@ export class Selection implements ISelect {
 		}
 	}
 
+	/**
+	 * Inserts invisible fake nodes on the boundaries of the current selection
+	 * and returns them. Unlike [[Select.save]] the selection stays valid while
+	 * the DOM around it is being modified. Restore it later with [[Select.restoreFakes]].
+	 */
 	fakes(): [] | [Node] | [Node, Node] {
 		const sel = this.sel;
 		if (!sel || !sel.rangeCount) {
@@ -358,6 +363,10 @@ export class Selection implements ISelect {
 		return result as [Node, Node] | [Node] | [];
 	}
 
+	/**
+	 * Restores the selection previously saved with [[Select.fakes]]
+	 * and removes the fake nodes (disconnected fakes are ignored).
+	 */
 	restoreFakes(fakes: [] | [Node] | [Node, Node]): void {
 		const nodes = fakes.filter(n => n.isConnected);
 		if (!nodes.length) {
@@ -706,8 +715,6 @@ export class Selection implements ISelect {
 		const node = this.j.createInside.div();
 		const fragment = this.j.createInside.fragment();
 
-		let lastChild: Node | null;
-
 		if (!this.isFocused() && this.j.isEditorMode()) {
 			this.focus();
 			this.restore();
@@ -726,14 +733,11 @@ export class Selection implements ISelect {
 			return;
 		}
 
-		lastChild = node.lastChild;
-
-		if (!lastChild) {
+		if (!node.lastChild) {
 			return;
 		}
 
 		while (node.firstChild) {
-			lastChild = node.firstChild;
 			fragment.appendChild(node.firstChild);
 		}
 
@@ -925,7 +929,8 @@ export class Selection implements ISelect {
 				nodes.push(start);
 			}
 
-			if (start.firstChild) {
+			// `start` can be undefined for an empty root
+			if (start?.firstChild) {
 				nodes.push(start.firstChild);
 			}
 		}
@@ -948,7 +953,8 @@ export class Selection implements ISelect {
 		fake: Node | null = null
 	): Nullable<boolean> {
 		const end = !start,
-			range = this.sel?.getRangeAt(0);
+			sel = this.sel,
+			range = sel?.rangeCount ? sel.getRangeAt(0) : null;
 
 		fake ??= this.current(false);
 
@@ -1472,6 +1478,11 @@ export class Selection implements ISelect {
 		return currentBox.previousElementSibling;
 	}
 
+	/**
+	 * Expands the non-collapsed selection outward: boundaries positioned on the
+	 * edge of their parents are moved out of them (e.g. `<p><b>|test|</b></p>`
+	 * becomes `<p>|<b>test</b>|</p>`)
+	 */
 	expandSelection(): this {
 		if (this.isCollapsed()) {
 			return this;

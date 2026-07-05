@@ -104,6 +104,14 @@ function unwrapList(
 	);
 	Dom.unwrap(li.parentElement);
 
+	// In the REPLACE mode the content will be immediately wrapped in a `li`
+	// of the new list inside `wrapList`, so it should stay in the document.
+	// Replacing it with a fragment here would dissolve the content
+	// (with `enter: 'br'`) and the new list would never be inserted.
+	if (mode === REPLACE) {
+		return li;
+	}
+
 	return Dom.replace(
 		li,
 		jodit.o.enter.toLowerCase() !== 'br'

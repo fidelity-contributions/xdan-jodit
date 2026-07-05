@@ -13,6 +13,16 @@ import { autobind } from 'jodit/core/decorators/autobind/autobind';
 import { Dom } from 'jodit/core/dom/dom';
 import { Eventify } from 'jodit/core/event-emitter/eventify';
 
+/**
+ * Walks the DOM tree in small chunks between browser tasks so that even huge
+ * documents do not block the main thread.
+ *
+ * Events:
+ * - `visit` - is called for every node; return `true` to mark the pass as
+ *   "had effect" (it will be passed into the `end` event)
+ * - `break` - the pass was interrupted via [[LazyWalker.break]]
+ * - `end` - the pass is finished, receives `true` if some `visit` handler returned `true`
+ */
 export class LazyWalker
 	extends Eventify<{
 		visit: (node: Node) => boolean;
@@ -23,14 +33,22 @@ export class LazyWalker
 {
 	private workNodes: Nullable<Generator<Node>> = null;
 
+	/**
+	 * Starts a new pass over the `root` tree.
+	 * If a previous pass is still running it will be stopped first.
+	 */
 	setWork(root: Node): this {
 		if (this.isWorked) {
 			this.break();
+		} else {
+			// cancel a not yet started pass scheduled by the previous `setWork` call
+			this.stop();
 		}
 
 		this.workNodes = Dom.eachGen(root, !this.options.reverse);
 
 		this.isFinished = false;
+		this.hadAffect = false;
 		this._requestStarting();
 		return this;
 	}
@@ -42,16 +60,18 @@ export class LazyWalker
 	constructor(
 		private readonly async: IAsync,
 		private readonly options: {
+			/** Visit only nodes with this `nodeType` (e.g. `Node.ELEMENT_NODE`) */
 			readonly whatToShow?: number;
+			/** Walk the tree from the last node to the first */
 			readonly reverse?: boolean;
+			/** How many nodes are processed per one chunk. Default: 50 */
 			readonly timeoutChunkSize?: number;
+			/** Delay between chunks in ms */
 			readonly timeout?: number;
 		} = {}
 	) {
 		super();
 	}
-
-	private idleId: number = 0;
 
 	private __schedulerController: AbortController | null = null;
 
@@ -84,7 +104,8 @@ export class LazyWalker
 		this.isWorked = false;
 		this.isFinished = true;
 		this.workNodes = null;
-		this.async.cancelIdleCallback(this.idleId);
+		this.__schedulerController?.abort();
+		this.__schedulerController = null;
 	}
 
 	override destruct(): void {
@@ -100,7 +121,7 @@ export class LazyWalker
 			let count = 0;
 			const chunkSize = this.options.timeoutChunkSize ?? 50;
 
-			while (!this.isFinished && count <= chunkSize) {
+			while (!this.isFinished && count < chunkSize) {
 				const item = this.workNodes.next();
 				count += 1;
 				if (this.visitNode(item.value)) {

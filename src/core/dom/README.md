@@ -30,7 +30,9 @@ For example, your plugin can search for some nodes, or text. If each time you ru
 then the interface will noticeably slow down on large documents. To avoid this, this class is made.
 
 ```js
-const walker = new Jodit.modules.LazyWalker(new Jodit.modules.Async(), 100);
+const walker = new Jodit.modules.LazyWalker(new Jodit.modules.Async(), {
+	timeoutChunkSize: 100
+});
 const names = [];
 
 walker

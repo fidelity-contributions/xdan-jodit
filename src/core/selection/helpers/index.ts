@@ -18,7 +18,9 @@ export * from './move-node-inside-start';
 export * from './move-the-node-along-the-edge-outward';
 
 /**
- * Check if the cursor is at the edge of the string
+ * Despite the name, returns `true` when the cursor is NOT at the checked edge
+ * of the text node: there is significant (non invisible-space) text between
+ * the offset and the start (`start = true`) or the end (`end = true`) of the string.
  * @private
  */
 export function cursorInTheEdgeOfString(

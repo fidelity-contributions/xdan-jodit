@@ -149,6 +149,91 @@ describe('Test Dom module', function () {
 					expect(names.toString()).equals('LI,2,LI,1');
 				});
 			});
+
+			describe('Many siblings', function () {
+				it('Should iterate wide sibling lists in proper order', () => {
+					const node = document.createElement('div');
+
+					node.innerHTML = new Array(10)
+						.fill(0)
+						.map((_, i) => `<span>${i}</span>`)
+						.join('');
+
+					const values = [];
+
+					Dom.find(
+						node.firstChild,
+						n => {
+							if (Dom.isText(n)) {
+								values.push(n.nodeValue);
+							}
+						},
+						node
+					);
+
+					expect(values.join('')).equals('123456789');
+
+					values.length = 0;
+
+					Dom.find(
+						node.lastChild,
+						n => {
+							if (Dom.isText(n)) {
+								values.push(n.nodeValue);
+							}
+						},
+						node,
+						false
+					);
+
+					expect(values.join('')).equals('876543210');
+				});
+			});
+		});
+
+		describe('Method between', function () {
+			it('Should call callback for all nodes between start and end', () => {
+				const node = document.createElement('div');
+
+				node.innerHTML =
+					'<p>1<span id="s"></span>2</p><p>3</p><p>4<span id="e"></span>5</p>';
+
+				Dom.between(
+					node.querySelector('#s'),
+					node.querySelector('#e'),
+					iterate
+				);
+
+				expect(names.toString()).equals('2,P,3,P,4');
+			});
+
+			it('Should stop iterating when callback returns true', () => {
+				const node = document.createElement('div');
+
+				node.innerHTML =
+					'<p>1<span id="s"></span>2</p><p>3</p><p>4<span id="e"></span>5</p>';
+
+				Dom.between(
+					node.querySelector('#s'),
+					node.querySelector('#e'),
+					elm => {
+						iterate(elm);
+						return Dom.isText(elm) && elm.nodeValue === '3';
+					}
+				);
+
+				expect(names.toString()).equals('2,P,3');
+			});
+
+			it('Should not iterate outside when end is an ancestor of start', () => {
+				const node = document.createElement('div');
+
+				node.innerHTML = '<p>1<span id="s"></span></p><p>2</p>';
+
+				Dom.between(node.querySelector('#s'), node.firstChild, iterate);
+
+				expect(names.toString()).equals('');
+			});
 		});
 	});
 
@@ -277,6 +362,72 @@ describe('Test Dom module', function () {
 
 				expect(Dom.isEmpty(node, new Set([]))).is.true;
 			});
+		});
+	});
+
+	describe('Method isFragment', function () {
+		it('Should return true for document fragments', function () {
+			expect(Dom.isFragment(document.createDocumentFragment())).is.true;
+
+			// fragment inside an inert document
+			const template = document.createElement('template');
+			template.innerHTML = '<p>test</p>';
+			expect(Dom.isFragment(template.content)).is.true;
+		});
+
+		it('Should return false for other values', function () {
+			expect(Dom.isFragment(document.createElement('div'))).is.false;
+			expect(Dom.isFragment(document.createTextNode('test'))).is.false;
+			expect(Dom.isFragment(document)).is.false;
+			expect(Dom.isFragment(null)).is.false;
+			expect(Dom.isFragment('')).is.false;
+		});
+	});
+
+	describe('Method replace', function () {
+		it('Should replace one tag with another keeping content and attributes', function () {
+			const editor = getJodit();
+			const div = document.createElement('div');
+			div.innerHTML = '<span data-x="1">content</span>';
+
+			const strong = Dom.replace(
+				div.firstChild,
+				'strong',
+				editor.createInside,
+				true
+			);
+
+			expect(div.innerHTML).equals('<strong data-x="1">content</strong>');
+			expect(strong.tagName).equals('STRONG');
+		});
+
+		it('Should replace tag with ready element', function () {
+			const div = document.createElement('div');
+			div.innerHTML = '<span>content</span>';
+
+			const em = document.createElement('em');
+			const result = Dom.replace(div.firstChild, em);
+
+			expect(result).equals(em);
+			expect(div.innerHTML).equals('<em>content</em>');
+		});
+	});
+
+	describe('Method replaceTemporaryFromString', function () {
+		it('Should remove temporary wrappers and keep their content', function () {
+			expect(
+				Dom.replaceTemporaryFromString(
+					'<p>a <span data-jodit-temp="true">b</span> c</p>'
+				)
+			).equals('<p>a b c</p>');
+		});
+
+		it('Should support the attribute without a value', function () {
+			expect(
+				Dom.replaceTemporaryFromString(
+					'<p><span data-jodit-temp>b</span></p>'
+				)
+			).equals('<p>b</p>');
 		});
 	});
 
@@ -661,6 +812,70 @@ describe('Test Dom module', function () {
 				div.innerHTML =
 					"<ul><li><strong>str</strong><span>sp</span><u>unn</u></li><li><i>ill</i><b>bit</b><u>ula</u><img src='' alt=''></li></ul>";
 				walker.setWork(div);
+			});
+		});
+
+		describe('Repeated setWork', () => {
+			it('should process only the last tree and emit end once', done => {
+				const walker = new LazyWalker(new Async());
+				const names = [];
+				let endCount = 0;
+
+				walker
+					.on('visit', node => {
+						names.push(node.nodeName.toLowerCase());
+					})
+					.on('end', () => {
+						endCount += 1;
+						expect(endCount).eq(1);
+						expect(names).deep.eq(['p', '#text']);
+						done();
+					});
+
+				const div1 = document.createElement('div');
+				div1.innerHTML = '<span>a</span>';
+
+				const div2 = document.createElement('div');
+				div2.innerHTML = '<p>b</p>';
+
+				walker.setWork(div1);
+				walker.setWork(div2);
+			});
+		});
+
+		describe('Restart after break', () => {
+			it('should reset the affect flag between passes', done => {
+				const asyncM = new Async();
+				const walker = new LazyWalker(asyncM, {
+					timeoutChunkSize: 1,
+					timeout: 100
+				});
+
+				const div = document.createElement('div');
+				div.innerHTML = '<b>1</b><i>2</i><u>3</u>';
+
+				let pass = 1;
+
+				// the first pass "affects" nodes, the second one - does not
+				walker.on('visit', () => pass === 1);
+
+				walker.on('break', () => {
+					asyncM.setTimeout(() => {
+						pass = 2;
+						walker.setWork(div);
+					}, 10);
+				});
+
+				walker.on('end', affect => {
+					expect(pass).eq(2);
+					expect(affect).is.false;
+					done();
+				});
+
+				walker.setWork(div);
+
+				// break the first pass in the middle, between two chunks
+				asyncM.setTimeout(() => walker.break(), 150);
 			});
 		});
 	});

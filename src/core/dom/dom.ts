@@ -43,6 +43,11 @@ import { dataBind } from 'jodit/core/helpers/utils/data-bind';
 import { error } from 'jodit/core/helpers/utils/error';
 import { call } from 'jodit/core/helpers/utils/utils';
 
+const TEMP_ELEMENT_REG_EXP = new RegExp(
+	`<([a-z]+)[^>]+${TEMP_ATTR}[^>]*>(.+?)</\\1>`,
+	'gi'
+);
+
 /**
  * Module for working with DOM
  */
@@ -212,7 +217,11 @@ export class Dom {
 	}
 
 	/**
-	 * Call functions for all nodes between `start` and `end`
+	 * Call callback for all nodes between `start` and `end` in document order
+	 * (`start` and `end` are not included). Iteration stops when the callback returns `true`.
+	 *
+	 * `end` must be positioned after `start` in the document (e.g. selection markers),
+	 * otherwise iteration will stop only at the end of the tree.
 	 */
 	static between(
 		start: Node,
@@ -231,6 +240,11 @@ export class Dom {
 			if (!step) {
 				while (next && !next.nextSibling) {
 					next = next.parentNode;
+
+					// `end` was reached while ascending - all nodes between were visited
+					if (next === end) {
+						return;
+					}
 				}
 
 				step = next?.nextSibling as Nullable<Node>;
@@ -249,14 +263,14 @@ export class Dom {
 	 * @param notMoveContent - false - Move content from elm to newTagName
 	 * @example
 	 * ```javascript
-	 * Jodit.modules.Dom.replace(parent.editor.getElementsByTagName('span')[0], 'p');
-	 * // Replace the first <span> element to the < p >
+	 * Jodit.modules.Dom.replace(
+	 *   parent.editor.getElementsByTagName('span')[0],
+	 *   'p',
+	 *   parent.createInside
+	 * );
+	 * // Replace the first <span> element to the <p>
 	 * ```
 	 */
-	static replace<T extends HTMLElement>(
-		elm: Node,
-		newTagName: HTMLTagNames
-	): T;
 	static replace<T extends HTMLElement>(
 		elm: Node,
 		newTagName: HTMLTagNames,
@@ -264,11 +278,24 @@ export class Dom {
 		withAttributes?: boolean,
 		notMoveContent?: boolean
 	): T;
-	static replace<T extends Node>(elm: Node, newTagName: T): T;
 	static replace<T extends Node>(
 		elm: Node,
-		newTagName: T | string,
+		newElement: T,
 		create?: ICreate,
+		withAttributes?: boolean,
+		notMoveContent?: boolean
+	): T;
+	static replace<T extends Node>(
+		elm: Node,
+		html: string,
+		create: ICreate,
+		withAttributes?: boolean,
+		notMoveContent?: boolean
+	): T;
+	static replace<T extends Node>(
+		elm: Node,
+		newTagNameOrElement: HTMLTagNames | T,
+		create: ICreate,
 		withAttributes?: boolean,
 		notMoveContent?: boolean
 	): T;
@@ -420,9 +447,11 @@ export class Dom {
 	}
 
 	/**
-	 * Check if element is a list	element UL or OL
+	 * Check if element is a list element UL or OL
 	 */
-	static isList(elm: Nullable<Node>): elm is HTMLOListElement {
+	static isList(
+		elm: Nullable<Node>
+	): elm is HTMLUListElement | HTMLOListElement {
 		return Dom.isTag(elm, LIST_TAGS);
 	}
 
@@ -465,7 +494,7 @@ export class Dom {
 	/**
 	 * Check if element is comment node
 	 */
-	static isComment(node: Node): node is Comment {
+	static isComment(node: Nullable<Node> | false): node is Comment {
 		return Boolean(node && node.nodeType === Node.COMMENT_NODE);
 	}
 
@@ -490,9 +519,10 @@ export class Dom {
 			return false;
 		}
 
-		const win = node.ownerDocument?.defaultView;
-
-		return Boolean(win && node.nodeType === Node.DOCUMENT_FRAGMENT_NODE);
+		// no `defaultView` requirement — fragments of an inert document
+		// (`template.content`, `DOMParser`, `implementation.createHTMLDocument`)
+		// are still fragments
+		return node.nodeType === Node.DOCUMENT_FRAGMENT_NODE;
 	}
 
 	/**
@@ -697,7 +727,9 @@ export class Dom {
 	}
 
 	/**
-	 * Find next/prev node what `condition(next) === true`
+	 * Lazily iterate over all nodes what follow after `start` (in document order
+	 * for `leftToRight = true`, in reverse order otherwise) inside `root`.
+	 * Ancestors of `start` are not yielded.
 	 */
 	static *nextGen(
 		start: Node,
@@ -715,9 +747,11 @@ export class Dom {
 				: currentNode.previousSibling;
 
 			while (next) {
-				stack.unshift(next);
+				stack.push(next);
 				next = leftToRight ? next.nextSibling : next.previousSibling;
 			}
+
+			stack.reverse();
 
 			yield* this.runInStack(start, stack, leftToRight, withChild);
 
@@ -736,7 +770,7 @@ export class Dom {
 	 * ```javascript
 	 * Jodit.modules.Dom.each(editor.s.current(), function (node) {
 	 *  if (node.nodeType === Node.TEXT_NODE) {
-	 *      node.nodeValue = node.nodeValue.replace(Jodit.INVISIBLE_SPACE_REG_EX, '') // remove all of the text element codes invisible character
+	 *      node.nodeValue = node.nodeValue.replace(Jodit.INVISIBLE_SPACE_REG_EXP(), '') // remove all of the text element codes invisible character
 	 *  }
 	 * });
 	 * ```
@@ -887,12 +921,19 @@ export class Dom {
 		);
 	}
 
+	/**
+	 * Returns the previous (`left = true`) or next sibling of the node
+	 */
 	static sibling(node: Node, left?: boolean): Nullable<Node> {
 		return left ? node.previousSibling : node.nextSibling;
 	}
 
 	/**
 	 * It goes through all the elements in ascending order, and checks to see if they meet the predetermined condition
+	 *
+	 * The condition is checked for the `node` itself too. The `root` reached
+	 * while ascending is checked only when `checkRoot = true`
+	 * (but if `node === root` it is checked in any case).
 	 */
 	static up<T extends HTMLElement>(
 		node: Nullable<Node>,
@@ -1149,6 +1190,12 @@ export class Dom {
 		);
 	}
 
+	/**
+	 * Insert a node into the range and collapse the range to the start of
+	 * the inserted content. Unlike the native `Range.insertNode` it does not
+	 * split inseparable elements (BR, HR, IMG etc.) and removes empty text
+	 * nodes produced by the split of a text container.
+	 */
 	static safeInsertNode(range: Range, node: Node): void {
 		range.collapsed || range.deleteContents();
 		const child = Dom.isFragment(node) ? node.lastChild : node;
@@ -1218,28 +1265,26 @@ export class Dom {
 		node: Node | null | undefined | false | EventTarget,
 		tagNames: K | Set<K>
 	): node is HTMLElementTagNameMap[K] {
+		if (Array.isArray(tagNames)) {
+			throw new TypeError('Dom.isTag does not support array');
+		}
+
 		if (!this.isElement(node)) {
 			return false;
 		}
 
 		const nameL = node.tagName.toLowerCase() as K;
-		const nameU = node.tagName.toUpperCase() as K;
 
 		if (tagNames instanceof Set) {
-			return tagNames.has(nameL) || tagNames.has(nameU);
+			return (
+				tagNames.has(nameL) ||
+				tagNames.has(node.tagName.toUpperCase() as K)
+			);
 		}
 
-		if (Array.isArray(tagNames)) {
-			throw new TypeError('Dom.isTag does not support array');
-		}
-
-		const tags = tagNames;
-
-		if (nameL === tags || nameU === tags) {
-			return true;
-		}
-
-		return false;
+		return (
+			nameL === tagNames || (node.tagName.toUpperCase() as K) === tagNames
+		);
 	}
 
 	/**
@@ -1277,13 +1322,10 @@ export class Dom {
 	}
 
 	/**
-	 * Replace temporary elements from string
+	 * Unwrap temporary elements inside a HTML string (keeps their content)
 	 */
 	static replaceTemporaryFromString(value: string): string {
-		return value.replace(
-			/<([a-z]+)[^>]+data-jodit-temp[^>]+>(.+?)<\/\1>/gi,
-			'$2'
-		);
+		return value.replace(TEMP_ELEMENT_REG_EXP, '$2');
 	}
 
 	/**

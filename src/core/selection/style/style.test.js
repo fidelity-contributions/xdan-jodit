@@ -45,6 +45,20 @@ describe('Apply style', () => {
 							}
 						],
 						[
+							'<ul><li>|test|</li></ul>',
+							{ element: 'ol' },
+							'<ol><li>|test|</li></ol>',
+							{
+								enter: 'BR',
+								disablePlugins: [
+									'wrap-nodes',
+									'add-new-line',
+									'enter'
+								],
+								buttons: ['ul', 'ol']
+							}
+						],
+						[
 							'<ol><li>ordered</li><li>|list</li><li>pop</li></ol>',
 							{ element: 'ul' },
 							'<ol><li>ordered</li></ol><ul><li>|list</li></ul><ol><li>pop</li></ol>'
@@ -967,6 +981,29 @@ describe('Apply style', () => {
 						});
 					});
 				}
+			});
+		});
+
+		describe('Toggle attribute with number value', function () {
+			it('Should toggle the attribute off on the second apply', function () {
+				editor.value = '<p>|test|</p>';
+				setCursorToChar(editor);
+
+				editor.s.commitStyle({
+					element: 'a',
+					attributes: { tabindex: 2 }
+				});
+
+				expect(sortAttributes(editor.value)).equals(
+					'<p><a tabindex="2">test</a></p>'
+				);
+
+				editor.s.commitStyle({
+					element: 'a',
+					attributes: { tabindex: 2 }
+				});
+
+				expect(sortAttributes(editor.value)).equals('<p>test</p>');
 			});
 		});
 

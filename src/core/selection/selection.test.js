@@ -132,6 +132,22 @@ describe('Selection Module Tests', function () {
 	});
 
 	describe('cursorInTheEdge', function () {
+		describe('Without any selection', function () {
+			it('Should return null and do not throw', function () {
+				const editor = getJodit();
+				editor.value = '<p>test</p>';
+
+				const sel = editor.s.sel;
+				sel && sel.removeAllRanges();
+
+				expect(editor.s.cursorInTheEdge(true, editor.editor.firstChild))
+					.is.null;
+				expect(
+					editor.s.cursorInTheEdge(false, editor.editor.firstChild)
+				).is.null;
+			});
+		});
+
 		describe('Cursor in the text', function () {
 			describe('cursorOnTheLeft and cursorOnTheRight', function () {
 				describe('Cursor inside P but inside Li', function () {
@@ -702,6 +718,31 @@ describe('Selection Module Tests', function () {
 			expect(['#text'].toString().toLowerCase()).equals(
 				nodeNames.toString().toLowerCase()
 			);
+		});
+
+		it('Should not throw for the empty editor', function () {
+			const editor = getJodit();
+			editor.s.focus();
+			editor.editor.innerHTML = '';
+
+			const range = editor.s.createRange();
+			range.setStart(editor.editor, 0);
+			range.collapse(true);
+
+			// set the selection natively so that nothing normalizes the empty editor
+			const sel = editor.s.sel;
+			sel.removeAllRanges();
+			sel.addRange(range);
+
+			const nodeNames = [];
+
+			expect(() => {
+				editor.s.eachSelection(function (node) {
+					nodeNames.push(node.nodeName);
+				});
+			}).does.not.throw();
+
+			expect(nodeNames.length).equals(0);
 		});
 	});
 

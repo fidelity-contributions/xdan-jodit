@@ -169,7 +169,9 @@ function toggleAttribute(
 
 	const hook = jodit.e.fire.bind(jodit.e, `${_PREFIX}AfterToggleAttribute`);
 
-	if (attr(elm, key) === value) {
+	// `attr()` getter always returns a string, so a number/boolean value
+	// must be normalized, otherwise the toggle-off branch is unreachable
+	if (attr(elm, key) === (value == null ? value : String(value))) {
 		!dry && attr(elm, key, null);
 		mode = UNSET;
 		!dry && hook(mode, elm, key, value);
