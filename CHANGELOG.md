@@ -11,6 +11,10 @@
 
 ## 4.12.38
 
+#### :bug: Bug Fix
+
+- **Scroll into view / Search**: `inView` (used by `scrollIntoViewIfNeeded`) only checked that an element wasn't below the viewport bottom, not that it wasn't above the top. An element scrolled **above** the visible area was therefore reported as visible, so navigating to it never scrolled — most visibly, cycling through search results and wrapping around to a match near the top of the page did not scroll up to it. `inView` now also requires the element's bottom to be at or below the viewport top. Fixes [#1279](https://github.com/xdan/jodit/issues/1279).
+
 #### :rocket: New Feature
 
 - **Link dialog / `link.deriveUrlFromText`**: new opt-in option (default `false`). When the link dialog is opened for a new link with an empty URL field, the URL is pre-filled from the selected text when it looks like a URL or email — a bare domain gets `https://` (`example.com` → `https://example.com`), an email gets `mailto:`, an already-schemed URL is kept as is, and plain text is left untouched. Requested in [#1248](https://github.com/xdan/jodit/issues/1248) / [#1323](https://github.com/xdan/jodit/issues/1323).

@@ -43,10 +43,14 @@ export function inView(
 		}
 	}
 
-	// Check it's within the document viewport
-	return (
-		top <= ((doc.documentElement && doc.documentElement.clientHeight) || 0)
-	);
+	// Check it's within the document viewport: the element must not be below
+	// the viewport bottom, and (its bottom) must not be above the viewport top —
+	// the latter guard was missing, so an element scrolled above the top was
+	// wrongly reported as visible and never scrolled to. See #1279
+	const clientHeight =
+		(doc.documentElement && doc.documentElement.clientHeight) || 0;
+
+	return top <= clientHeight && top + height >= 0;
 }
 
 /**
