@@ -5,6 +5,50 @@
  */
 
 describe('Enter behavior Tests', function () {
+	// https://github.com/xdan/jodit/issues/1300
+	describe('Scroll after Enter', function () {
+		const fill = editor => {
+			const lines = [];
+			for (let i = 0; i < 30; i += 1) {
+				lines.push('<p>line ' + i + '</p>');
+			}
+			editor.value = lines.join('');
+		};
+
+		it('Should scroll the editor to follow the cursor when Enter is pressed at the bottom', function () {
+			const editor = getJodit({ height: 150 });
+			fill(editor);
+
+			const area = editor.editor;
+
+			// sanity: the editing area is actually scrollable
+			expect(area.scrollHeight).is.above(area.clientHeight);
+
+			editor.s.setCursorIn(area.querySelector('p:last-child'), false);
+			area.scrollTop = 0;
+
+			editor.execCommand('enter');
+
+			expect(area.scrollTop).is.above(0);
+		});
+
+		it('Should not scroll when the caret line is already visible', function () {
+			const editor = getJodit({ height: 150 });
+			fill(editor);
+
+			const area = editor.editor;
+			const mid = area.querySelectorAll('p')[15];
+
+			editor.s.setCursorIn(mid, false);
+			area.scrollTop = mid.offsetTop;
+			const before = area.scrollTop;
+
+			editor.execCommand('enter');
+
+			expect(area.scrollTop).equals(before);
+		});
+	});
+
 	describe('Enter key', function () {
 		describe('Enter BR', function () {
 			it('Should simple insert BR element', function () {

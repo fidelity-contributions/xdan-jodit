@@ -24,6 +24,10 @@
   Jodit.make('#editor', { nonce: 'r4nd0m' });
   ```
 
+#### :house: Internal
+
+- **Enter tests**: added a regression test asserting that pressing Enter with the caret at the bottom of a scrollable editing area scrolls to follow the cursor (and does not scroll when the caret line is already visible). Covers the scenario from [#1300](https://github.com/xdan/jodit/issues/1300), which works on the current version.
+
 ## 4.12.37
 
 #### :bug: Bug Fix
