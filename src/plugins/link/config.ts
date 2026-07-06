@@ -43,6 +43,15 @@ declare module 'jodit/config' {
 			processPastedLink: boolean;
 
 			/**
+			 * When opening the link dialog for a new link with an empty URL field,
+			 * pre-fill it from the selected text if that text looks like a URL or
+			 * an email address (`example.com` → `https://example.com`,
+			 * `user@site.com` → `mailto:user@site.com`). Plain text that is not a
+			 * URL/email is left untouched. Default: false.
+			 */
+			deriveUrlFromText: boolean;
+
+			/**
 			 * Show `no follow` checkbox in link dialog.
 			 */
 			noFollowCheckbox: boolean;
@@ -99,6 +108,7 @@ Config.prototype.link = {
 	followOnDblClick: false,
 	processVideoLink: true,
 	processPastedLink: true,
+	deriveUrlFromText: false,
 	noFollowCheckbox: true,
 	openInNewTabCheckbox: true,
 	openInNewTabCheckboxDefaultChecked: false,

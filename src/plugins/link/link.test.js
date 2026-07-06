@@ -54,6 +54,75 @@ describe('Link plugin', () => {
 		});
 	});
 
+	// https://github.com/xdan/jodit/issues/1248
+	describe('deriveUrlFromText', () => {
+		const openLinkFor = (value, opts) => {
+			const editor = getJodit(opts);
+			editor.value = value;
+			setCursorToChar(editor);
+
+			clickButton('link', editor);
+			const popup = getOpenedPopup(editor);
+			return { editor, popup };
+		};
+
+		it('Should not touch the URL field by default', () => {
+			const { popup } = openLinkFor('<p>|example.com|</p>');
+			expect(popup.querySelector('[ref=url_input]').value).equals('');
+		});
+
+		describe('When enabled', () => {
+			it('Should prefill a bare domain with https://', () => {
+				const { popup } = openLinkFor('<p>|example.com|</p>', {
+					link: { deriveUrlFromText: true }
+				});
+				expect(popup.querySelector('[ref=url_input]').value).equals(
+					'https://example.com'
+				);
+			});
+
+			it('Should prefill an email with mailto:', () => {
+				const { popup } = openLinkFor('<p>|user@site.com|</p>', {
+					link: { deriveUrlFromText: true }
+				});
+				expect(popup.querySelector('[ref=url_input]').value).equals(
+					'mailto:user@site.com'
+				);
+			});
+
+			it('Should keep an already schemed URL as is', () => {
+				const { popup } = openLinkFor('<p>|http://x.com/a|</p>', {
+					link: { deriveUrlFromText: true }
+				});
+				expect(popup.querySelector('[ref=url_input]').value).equals(
+					'http://x.com/a'
+				);
+			});
+
+			it('Should leave plain text untouched', () => {
+				const { popup } = openLinkFor('<p>|click here|</p>', {
+					link: { deriveUrlFromText: true }
+				});
+				expect(popup.querySelector('[ref=url_input]').value).equals('');
+			});
+
+			it('Should not override the href when editing an existing link', () => {
+				const editor = getJodit({ link: { deriveUrlFromText: true } });
+				editor.value = '<p><a href="https://x.com">example.com</a></p>';
+				editor.s.setCursorIn(
+					editor.editor.querySelector('a').firstChild
+				);
+
+				clickButton('link', editor);
+				const popup = getOpenedPopup(editor);
+
+				expect(popup.querySelector('[ref=url_input]').value).equals(
+					'https://x.com'
+				);
+			});
+		});
+	});
+
 	describe('Insert link', () => {
 		describe('Insert simple link', () => {
 			it('Should insert as simple link', () => {

@@ -241,6 +241,15 @@ export class link extends Plugin {
 		} else {
 			Dom.hide(unlink);
 
+			if (
+				jodit.o.link.deriveUrlFromText &&
+				url_input &&
+				!isImageContent &&
+				!url_input.value.trim()
+			) {
+				url_input.value = guessUrlFromText(content_input.value);
+			}
+
 			if (openInNewTabCheckbox && target_checkbox) {
 				target_checkbox.checked = openInNewTabCheckboxDefaultChecked;
 			}
@@ -394,6 +403,36 @@ export class link extends Plugin {
 }
 
 pluginSystem.add('link', link);
+
+/**
+ * Guess a usable `href` from the selected text for the link dialog.
+ * Returns an empty string when the text is not a plausible URL/email,
+ * so plain text (e.g. "click here") is left untouched.
+ */
+function guessUrlFromText(text: string): string {
+	const value = text.trim();
+
+	if (!value || /\s/.test(value)) {
+		return '';
+	}
+
+	// already an explicit scheme, an anchor or a relative path
+	if (/^(https?:|mailto:|tel:|ftp:|#|\/|\.{1,2}\/)/i.test(value)) {
+		return value;
+	}
+
+	// email address -> mailto:
+	if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+		return `mailto:${value}`;
+	}
+
+	// bare domain like example.com or www.example.com/path -> https://
+	if (/^[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(value)) {
+		return `https://${value}`;
+	}
+
+	return '';
+}
 
 function writeClasses(
 	modeClassName: 'input' | 'select',

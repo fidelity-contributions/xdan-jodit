@@ -13,6 +13,7 @@
 
 #### :rocket: New Feature
 
+- **Link dialog / `link.deriveUrlFromText`**: new opt-in option (default `false`). When the link dialog is opened for a new link with an empty URL field, the URL is pre-filled from the selected text when it looks like a URL or email — a bare domain gets `https://` (`example.com` → `https://example.com`), an email gets `mailto:`, an already-schemed URL is kept as is, and plain text is left untouched. Requested in [#1248](https://github.com/xdan/jodit/issues/1248) / [#1323](https://github.com/xdan/jodit/issues/1323).
 - **CSP `nonce` support**: added a `nonce` option that is applied to every `<style>`, `<script>` and `<link>` element Jodit injects at runtime (plugin styles, CDN scripts for ACE/beautify, downloaded stylesheets). Setting it to the nonce from your `Content-Security-Policy` header lets the editor run under a strict `style-src`/`script-src` policy without `'unsafe-inline'`. Requested in [#1276](https://github.com/xdan/jodit/issues/1276).
 
   ```js

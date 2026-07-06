@@ -105,6 +105,28 @@ const editor = Jodit.make('#editor', {
 });
 ```
 
+#### `deriveUrlFromText`
+
+**Type:** `boolean`
+
+**Default:** `false`
+
+When `true` and the link dialog is opened for a **new** link with an empty URL
+field, the URL is pre-filled from the selected text if that text looks like a
+URL or an email address. A bare domain gets `https://` (`example.com` →
+`https://example.com`), an email gets `mailto:` (`user@site.com` →
+`mailto:user@site.com`), an already-schemed URL is kept as is, and plain text
+(e.g. `click here`) is left untouched.
+
+**Example:**
+```typescript
+const editor = Jodit.make('#editor', {
+    link: {
+        deriveUrlFromText: true
+    }
+});
+```
+
 #### `noFollowCheckbox`
 
 **Type:** `boolean`
