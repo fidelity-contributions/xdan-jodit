@@ -5,6 +5,42 @@
  */
 
 describe('Fullsize plugin', function () {
+	// https://github.com/xdan/jodit/issues/1255
+	describe('Restore page scroll after exiting fullsize (#1255)', function () {
+		let spacer;
+
+		beforeEach(() => {
+			spacer = document.createElement('div');
+			spacer.style.cssText = 'height:10000px';
+			document.body.appendChild(spacer);
+		});
+
+		afterEach(() => {
+			spacer.remove();
+			window.scrollTo(0, 0);
+		});
+
+		it('Should restore the page scroll position after closing fullsize', () => {
+			const editor = getJodit({ globalFullSize: true });
+
+			window.scrollTo(0, 500);
+			const before = window.scrollY;
+			expect(before).equals(500);
+
+			editor.toggleFullSize(true);
+
+			// entering fullsize puts <html> into position:fixed,
+			// which the browser scrolls back to the top
+			expect(window.scrollY).equals(0);
+
+			editor.toggleFullSize(false);
+
+			expect(window.scrollY).equals(before);
+
+			editor.destruct();
+		});
+	});
+
 	describe('Resize window while in fullsize (#1278)', function () {
 		it('Should restore the original width after exiting fullsize', () => {
 			const editor = getJodit();

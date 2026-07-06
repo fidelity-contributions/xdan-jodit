@@ -32,6 +32,8 @@ export function fullsize(editor: IViewWithToolbar): void {
 	let isEnabled: boolean = false,
 		oldHeight: number = 0,
 		oldWidth: number = 0,
+		savedScrollLeft: number = 0,
+		savedScrollTop: number = 0,
 		wasToggled = false;
 
 	const resize = (): void => {
@@ -105,6 +107,14 @@ export function fullsize(editor: IViewWithToolbar): void {
 					(fullsizeStack.size === 0 && !enable));
 
 			if (shouldToggleGlobalFullsize) {
+				// Entering fullsize sets `position: fixed` on <html>, which
+				// makes the browser reset the page scroll to the top. Remember
+				// the scroll position so it can be restored on exit (#1255).
+				if (enable) {
+					savedScrollLeft = editor.ow.scrollX;
+					savedScrollTop = editor.ow.scrollY;
+				}
+
 				let node = container.parentNode as HTMLElement;
 
 				while (
@@ -117,6 +127,10 @@ export function fullsize(editor: IViewWithToolbar): void {
 				}
 
 				resize();
+
+				if (!enable) {
+					editor.ow.scrollTo(savedScrollLeft, savedScrollTop);
+				}
 			}
 
 			events.fire('afterResize');

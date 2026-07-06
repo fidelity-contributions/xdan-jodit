@@ -13,6 +13,7 @@
 
 #### :bug: Bug Fix
 
+- **Fullsize / global fullscreen**: exiting fullsize scrolled the whole page back to the top. Entering global fullsize puts `<html>` into `position: fixed`, which makes the browser reset the page scroll to `0`; that position was never restored on exit. The scroll offset is now saved when entering fullsize and restored with `window.scrollTo()` when leaving it. Fixes [#1255](https://github.com/xdan/jodit/issues/1255).
 - **Scroll into view / Search**: `inView` (used by `scrollIntoViewIfNeeded`) only checked that an element wasn't below the viewport bottom, not that it wasn't above the top. An element scrolled **above** the visible area was therefore reported as visible, so navigating to it never scrolled — most visibly, cycling through search results and wrapping around to a match near the top of the page did not scroll up to it. `inView` now also requires the element's bottom to be at or below the viewport top. Fixes [#1279](https://github.com/xdan/jodit/issues/1279).
 
 #### :rocket: New Feature
