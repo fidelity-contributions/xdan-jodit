@@ -25,6 +25,10 @@
   Jodit.make('#editor', { nonce: 'r4nd0m' });
   ```
 
+#### :memo: Documentation
+
+- **Getting started / CDN**: bumped the pinned Jodit version in the cdnjs/unpkg snippets in `README.md` and `docs/getting-started.md` from the stale `4.7.6` to `4.12.37`. Refs [#1208](https://github.com/xdan/jodit/issues/1208).
+
 #### :house: Internal
 
 - **Enter tests**: added a regression test asserting that pressing Enter with the caret at the bottom of a scrollable editing area scrolls to follow the cursor (and does not scroll when the caret line is already visible). Covers the scenario from [#1300](https://github.com/xdan/jodit/issues/1300), which works on the current version.
