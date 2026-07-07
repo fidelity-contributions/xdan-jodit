@@ -5,39 +5,59 @@
  */
 
 // https://github.com/xdan/jodit/issues/820
-('imageeditor' in window.skipTest ? describe.skip : describe)(
-	'Image editor afterImageEditorSave event (#820)',
-	() => {
-		const DATA_URL =
-			'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+describe('Image editor afterImageEditorSave event (#820)', () => {
+	const DATA_URL =
+		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
-		it('Should fire afterImageEditorSave with the action box when Save is clicked', async () => {
-			const editor = getJodit({ history: { timeout: 0 } });
+	// The test asserts the CORE image editor. The PRO build
+	// (image-editor-pro) replaces `Jodit.modules.ImageEditor` globally and
+	// keeps the original as `Jodit.modules.ImageEditorCore` — restore it for
+	// the duration of the test.
+	let proImageEditor = null;
 
-			let fired = null;
-			editor.e.on('afterImageEditorSave', data => {
-				fired = data;
-			});
+	beforeEach(() => {
+		if (Jodit.modules.ImageEditorCore) {
+			proImageEditor = Jodit.modules.ImageEditor;
+			Jodit.modules.ImageEditor = Jodit.modules.ImageEditorCore;
+		}
+	});
 
-			const ie = editor.getInstance('ImageEditor', editor.o);
-			ie.open(DATA_URL, () => {});
+	afterEach(() => {
+		if (proImageEditor) {
+			Jodit.modules.ImageEditor = proImageEditor;
+			proImageEditor = null;
+		}
+	});
 
-			await delay(400);
-
-			const dialog = editor.ownerDocument.querySelector('.jodit-dialog');
-			expect(dialog).is.not.null;
-
-			const saveBtn = dialog.querySelector('[data-ref="save"]');
-			expect(saveBtn).is.not.null;
-
-			simulateEvent('click', saveBtn);
-			await delay(50);
-
-			expect(fired).is.not.null;
-			expect(fired.action).equals('resize');
-			expect(fired.box).is.not.undefined;
-
-			editor.destruct();
+	it('Should fire afterImageEditorSave with the action box when Save is clicked', async () => {
+		const editor = getJodit({
+			disablePlugins: 'imageEditorPro',
+			history: { timeout: 0 }
 		});
-	}
-);
+
+		let fired = null;
+		editor.e.on('afterImageEditorSave', data => {
+			fired = data;
+		});
+
+		const ie = editor.getInstance('ImageEditor', editor.o);
+		ie.open(DATA_URL, () => {});
+
+		await delay(400);
+
+		const dialog = editor.ownerDocument.querySelector('.jodit-dialog');
+		expect(dialog).is.not.null;
+
+		const saveBtn = dialog.querySelector('[data-ref="save"]');
+		expect(saveBtn).is.not.null;
+
+		simulateEvent('click', saveBtn);
+		await delay(50);
+
+		expect(fired).is.not.null;
+		expect(fired.action).equals('resize');
+		expect(fired.box).is.not.undefined;
+
+		editor.destruct();
+	});
+});

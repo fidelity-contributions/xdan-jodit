@@ -4,9 +4,30 @@
  * Copyright (c) 2013-2026 Valerii Chupurnov. All rights reserved. https://xdsoft.net
  */
 
-('imageeditor' in window.skipTest ? describe.skip : describe)(
-	'Image editor',
-	() => {
+describe('Image editor', () => {
+	// These tests assert the CORE image editor UI. The PRO build
+	// (image-editor-pro) replaces `Jodit.modules.ImageEditor` globally and
+	// keeps the original as `Jodit.modules.ImageEditorCore` — restore it for
+	// the duration of the suite. Editors are also created with
+	// `disablePlugins: 'imageEditorPro'` so a new instance does not replace
+	// the module again (unknown plugin names are ignored by the core).
+	let proImageEditor = null;
+
+	beforeEach(() => {
+		if (Jodit.modules.ImageEditorCore) {
+			proImageEditor = Jodit.modules.ImageEditor;
+			Jodit.modules.ImageEditor = Jodit.modules.ImageEditorCore;
+		}
+	});
+
+	afterEach(() => {
+		if (proImageEditor) {
+			Jodit.modules.ImageEditor = proImageEditor;
+			proImageEditor = null;
+		}
+	});
+
+	{
 		function getForm(dialog) {
 			return dialog.querySelector('.jodit-ui-image-properties-form')
 				.component;
@@ -30,7 +51,7 @@
 								url: 'https://xdsoft.net/jodit/connector/index.php'
 							}
 						},
-						disablePlugins: 'mobile'
+						disablePlugins: 'mobile,imageEditorPro'
 					});
 
 					editor.value = '<img alt="" src="tests/artio.jpg">';
@@ -132,6 +153,7 @@
 					const area = appendTestArea();
 
 					const editor = Jodit.make(area, {
+						disablePlugins: 'imageEditorPro',
 						history: {
 							timeout: 0
 						},
@@ -256,6 +278,7 @@
 			describe('Save as', () => {
 				it('Should shoe prompt dialog and update image src with new path from server', async () => {
 					const editor = getJodit({
+						disablePlugins: 'imageEditorPro',
 						uploader: {
 							url: 'https://xdsoft.net/jodit/connector/index.php?action=upload'
 						},
@@ -317,6 +340,7 @@
 
 				it('Should keep original src when server does not return newPath', async () => {
 					const editor = getJodit({
+						disablePlugins: 'imageEditorPro',
 						uploader: {
 							url: 'https://xdsoft.net/jodit/connector/index.php?action=upload'
 						},
@@ -375,6 +399,7 @@
 			describe('Enable ratio', () => {
 				it('Should deny resize image without ratio', async () => {
 					const editor = getJodit({
+						disablePlugins: 'imageEditorPro',
 						history: {
 							timeout: 0
 						},
@@ -487,6 +512,7 @@
 				it('Should allow resize image without ratio', async () => {
 					const area = appendTestArea();
 					const editor = Jodit.make(area, {
+						disablePlugins: 'imageEditorPro',
 						history: {
 							timeout: 0
 						},
@@ -621,7 +647,7 @@
 							url: 'https://xdsoft.net/jodit/connector/index.php'
 						}
 					},
-					disablePlugins: 'mobile'
+					disablePlugins: 'mobile,imageEditorPro'
 				});
 
 				const fb = editor.filebrowser;
@@ -681,4 +707,4 @@
 			}).timeout(7000);
 		});
 	}
-);
+});
