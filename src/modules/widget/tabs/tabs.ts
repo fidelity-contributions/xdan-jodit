@@ -154,10 +154,6 @@ export const TabsWidget = (
 		};
 	});
 
-	Object.values(nameToTab).forEach(({ button }) => {
-		button.container.style.width = (100 / tabs.length).toFixed(10) + '%';
-	});
-
 	const tab =
 		!state || !state.activeTab || !nameToTab[state.activeTab]
 			? firstTab

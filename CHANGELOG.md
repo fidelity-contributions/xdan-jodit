@@ -9,6 +9,12 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.12.40
+
+#### :nail_care: Polish
+
+- **Insert image / file popup**: the tabs of the insert-image / insert-file popup now size to their labels, so long localized captions — e.g. the German "Datei hochladen" / "Durchsuchen" — are no longer clipped and the popup widens to fit. Previously each tab was forced to an equal column width, which cut off longer translations. The change is scoped to a new `jodit-file-selector` class, so other tab popups (link, video …) keep their fixed equal-column layout.
+
 ## 4.12.39
 
 #### :bug: Bug Fix

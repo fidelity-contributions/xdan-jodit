@@ -101,6 +101,24 @@
 	}
 }
 
+/*
+ * Insert-image / insert-file popup (see FileSelectorWidget): size the tab
+ * buttons to their labels so long localized captions — e.g. the German
+ * "Datei hochladen" / "Durchsuchen" — are not clipped and the popup widens to
+ * fit. Scoped to `.jodit-file-selector`, so other tab popups (link, video …)
+ * keep their fixed equal-column layout.
+ */
+.jodit-file-selector {
+	.jodit-tabs__button {
+		// `flex: none` (0 0 auto) keeps each tab at its content width and stops
+		// the flex row from shrinking them back to fit the popup — otherwise
+		// long labels are clipped by `overflow: hidden`. The popup grows to fit.
+		flex: none;
+		width: max-content;
+		max-width: none;
+	}
+}
+
 .jodit-dialog_theme_dark,
 .jodit_theme_dark {
 	.jodit-tabs {

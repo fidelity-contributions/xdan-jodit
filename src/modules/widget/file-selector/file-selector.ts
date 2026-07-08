@@ -171,7 +171,15 @@ export const FileSelectorWidget = (
 		});
 	}
 
-	return TabsWidget(editor, tabs);
+	const box = TabsWidget(editor, tabs);
+
+	// Marks this popup so its tabs auto-size to their labels (see
+	// `.jodit-file-selector` in tabs.less) — long localized tab captions are no
+	// longer clipped — while leaving other tab popups (link, video …)
+	// untouched.
+	box.classList.add('jodit-file-selector');
+
+	return box;
 };
 
 function val(

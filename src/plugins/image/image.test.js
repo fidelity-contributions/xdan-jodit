@@ -6,8 +6,14 @@
 describe('Process Images plugins', function () {
 	describe('Toolbar', function () {
 		describe('Click on Image button with filebrowser', function () {
-			it('Should show Browse tab button without text clipping', function () {
+			it('Should size the insert-image tabs to their labels without clipping long localized captions', function () {
+				// 3 tabs (Upload/Browse/URL) in Russian: 'Загрузка' is longer
+				// than the equal-column width and used to be clipped.
 				const editor = getJodit({
+					language: 'ru',
+					uploader: {
+						url: 'https://example.com/upload'
+					},
 					filebrowser: {
 						ajax: {
 							url: 'https://example.com/filebrowser'
@@ -19,26 +25,36 @@ describe('Process Images plugins', function () {
 				const popup = getOpenedPopup(editor);
 				expect(popup).is.not.null;
 
+				// The insert-image/file popup is tagged so its tabs auto-size
+				// independently of other tab popups (link, video …).
+				expect(popup.querySelector('.jodit-file-selector')).is.not.null;
+
 				const tabButtons = popup.querySelectorAll(
 					'.jodit-tabs__button'
 				);
-				expect(tabButtons.length).to.be.at.least(2);
+				expect(tabButtons.length).to.equal(3);
 
-				const browseBtn = Array.from(tabButtons).find(
-					btn => btn.textContent.trim() === 'Browse'
-				);
-				expect(browseBtn).is.not.undefined;
+				// No tab label is clipped: its text fits its own box.
+				tabButtons.forEach(btn => {
+					const textEl = btn.querySelector('.jodit-ui-button__text');
+					expect(textEl).is.not.null;
+					expect(textEl.scrollWidth).to.be.at.most(
+						textEl.clientWidth,
+						`Tab "${textEl.textContent.trim()}" is clipped`
+					);
+				});
 
-				const textEl = browseBtn.querySelector(
-					'.jodit-ui-button__text'
+				// Tabs are content-sized, not forced to equal columns, so the
+				// longest ('Загрузка') is wider than the shortest ('URL').
+				const upload = Array.from(tabButtons).find(
+					b => b.textContent.trim() === 'Загрузка'
 				);
-				expect(textEl).is.not.null;
-
-				// The text element should not clip its content
-				expect(textEl.scrollWidth).to.be.at.most(
-					textEl.clientWidth,
-					'Browse button text is clipped (scrollWidth > clientWidth)'
+				const url = Array.from(tabButtons).find(
+					b => b.textContent.trim() === 'URL'
 				);
+				expect(upload).is.not.undefined;
+				expect(url).is.not.undefined;
+				expect(upload.offsetWidth).to.be.above(url.offsetWidth);
 			});
 		});
 
