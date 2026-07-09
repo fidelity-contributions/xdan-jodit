@@ -116,8 +116,12 @@ jobs:
                   node-version-file: '.nvmrc'
                   cache: 'npm'
 
-            - name: Update npm to latest
-              run: npm install -g npm@latest
+            # OIDC trusted publishing needs npm >= 11.5.1 (Node's bundled npm is
+            # too old → ENEEDAUTH), but `npm@latest` is 12.0.0, a broken release
+            # whose `sigstore` module is missing and crashes `npm publish`. Pin
+            # to the last known-good 11.6.4 (has OIDC support + working sigstore).
+            - name: Install npm with OIDC + working sigstore
+              run: npm install -g npm@11.6.4
 
             - name: Download build artifacts
               uses: actions/download-artifact@v8
