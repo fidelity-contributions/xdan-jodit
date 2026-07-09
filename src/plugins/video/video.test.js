@@ -121,6 +121,42 @@ describe('video plugin', () => {
 		});
 	});
 
+	describe('Inserted embed survives clean-html (#1381)', () => {
+		// `cleanHTML.denyTags` includes `iframe` by default, and its async
+		// LazyWalker used to strip the freshly inserted YouTube/Vimeo player
+		// ~300ms after insert ("briefly shown but then immediately removed").
+		// A recognized video embed must now survive the walker and keep a
+		// working (non-sandboxed) player.
+		it('should keep the YouTube iframe after the clean-html walker runs', async () => {
+			const jodit = getJodit({
+				cleanHTML: { timeout: 0 },
+				video: { defaultWidth: 200, defaultHeight: 100 }
+			});
+			jodit.value = '<p><br></p>';
+
+			simulateEvent('click', getButton('video', jodit));
+			const popup = getOpenedPopup(jodit);
+			simulateEvent('click', getButton('link', popup));
+
+			const input = popup.querySelector('[ref="url"]');
+			input.value = 'https://www.youtube.com/watch?v=3JZ_D3ELwOQ';
+			clickButton('Insert', popup);
+
+			// Wait for the async clean-html walker to sweep over the insert.
+			await new Promise(resolve =>
+				jodit.e.on('finishedCleanHTMLWorker', resolve)
+			);
+
+			const iframe = jodit.editor.querySelector('iframe');
+			expect(iframe).is.not.null;
+			expect(iframe.getAttribute('src')).equals(
+				'https://www.youtube.com/embed/3JZ_D3ELwOQ'
+			);
+			// an empty sandbox="" would block scripts and stop playback
+			expect(iframe.hasAttribute('sandbox')).is.false;
+		});
+	});
+
 	describe('Own video url parser', () => {
 		it('should parse url by own handler', () => {
 			const jodit = getJodit({

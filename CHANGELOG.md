@@ -9,6 +9,12 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.12.42
+
+#### :bug: Bug Fix
+
+- **Insert YouTube/Vimeo video**: an inserted video was shown for a moment and then immediately removed. Since 4.11.2 `cleanHTML.denyTags` includes `iframe` by default, and the plugin's async cleanup walker (which runs ~300 ms after every change) stripped the freshly inserted embed — so the built-in Video button produced nothing that survived. Recognized YouTube/Vimeo player iframes (the output of the Video button / `convertMediaUrlToVideoEmbed`) are now exempt from the `denyTags` sweep and from the automatic empty `sandbox=""` (which would have blocked playback anyway); arbitrary and bare `<iframe>` elements are still removed as before. Fixes [#1381](https://github.com/xdan/jodit/issues/1381).
+
 ## 4.12.40
 
 #### :nail_care: Polish

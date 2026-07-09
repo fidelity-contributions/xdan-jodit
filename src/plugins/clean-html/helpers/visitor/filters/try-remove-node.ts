@@ -12,6 +12,9 @@ import type { IDictionary, IJodit, Nullable } from 'jodit/types';
 import { IS_INLINE } from 'jodit/core/constants';
 import { Dom } from 'jodit/core/dom/dom';
 import { trimInv } from 'jodit/core/helpers/string/trim';
+import { attr } from 'jodit/core/helpers/utils/attr';
+
+import { isAllowedMediaEmbed } from '../../is-allowed-media-embed';
 
 /**
  * @private
@@ -55,7 +58,15 @@ function isRemovableNode(
 			return true;
 		}
 
-		if (!allow && deny && deny[node.nodeName]) {
+		// A YouTube/Vimeo player inserted through the Video button is trusted
+		// editor content, so keep it even though `iframe` is denied by default
+		// — otherwise the embed is stripped ~300ms after insertion (#1381).
+		// Arbitrary/bare iframes stay denied.
+		const isTrustedEmbed =
+			node.nodeName === 'IFRAME' &&
+			isAllowedMediaEmbed(attr(node as Element, 'src') || '');
+
+		if (!allow && deny && deny[node.nodeName] && !isTrustedEmbed) {
 			return true;
 		}
 	}

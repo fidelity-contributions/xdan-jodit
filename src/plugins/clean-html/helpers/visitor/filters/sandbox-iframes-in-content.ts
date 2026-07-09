@@ -12,6 +12,8 @@ import type { IJodit } from 'jodit/types';
 import { Dom } from 'jodit/core/dom/dom';
 import { attr } from 'jodit/core/helpers/utils/attr';
 
+import { isAllowedMediaEmbed } from '../../is-allowed-media-embed';
+
 /**
  * Add `sandbox=""` attribute to all `<iframe>` elements in the editor content
  * @private
@@ -30,6 +32,13 @@ export function sandboxIframesInContent(
 	}
 
 	const elm = nodeElm as HTMLIFrameElement;
+
+	// A trusted YouTube/Vimeo player (inserted via the Video button) must not
+	// get an empty `sandbox=""` — that blocks scripts and stops playback. It
+	// is served in its own third-party origin, so leave it as-is (#1381).
+	if (isAllowedMediaEmbed(attr(elm, 'src') || '')) {
+		return hadEffect;
+	}
 
 	if (!elm.hasAttribute('sandbox')) {
 		attr(elm, 'sandbox', '');
