@@ -9,6 +9,16 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## Unreleased
+
+#### :rocket: New Feature
+
+- **AsyncStorage**: `AsyncStorage.makeStorage(persistentOrStrategy, suffix, options?)` now accepts a third `options` argument with a `defaultProvider` field that overrides which provider backs the storage — `'local'` (localStorage), `'memory'`, or a custom `IAsyncStorage` implementation. When omitted the behaviour is unchanged (persistent IndexedDB with an in-memory fallback). The same option is exposed on the editor as the `asyncStorage` config option (`Jodit.make('#editor', { asyncStorage: { defaultProvider: 'local' } })`), so `jodit.asyncStorage` can be pointed at localStorage, memory, or your own backend without subclassing.
+
+#### :bug: Bug Fix
+
+- **Storage**: `LocalStorageProvider.delete(key)` removed the entire storage scope (every key sharing the same `rootKey`/suffix) instead of just the requested key — `delete` behaved identically to `clear`. It now reads the JSON blob, drops only that key and writes the rest back. Affects `Jodit.modules.Storage`/`buffer`/`storage` and the `@persistent` decorator when a single key is deleted.
+
 ## 4.12.42
 
 #### :bug: Bug Fix

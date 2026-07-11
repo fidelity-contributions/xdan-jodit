@@ -8,7 +8,12 @@
  * @module storage
  */
 
-import type { IAsyncStorage, IStorage, StorageValueType } from 'jodit/types';
+import type {
+	IAsyncStorage,
+	IAsyncStorageOptions,
+	IStorage,
+	StorageValueType
+} from 'jodit/types';
 import { camelCase } from 'jodit/core/helpers/string/camel-case';
 
 import {
@@ -75,7 +80,8 @@ export class AsyncStorage<T = StorageValueType> implements IAsyncStorage<T> {
 			| WebStorageStrategy
 			| 'memoryStorage'
 			| 'indexedDB' = false,
-		suffix?: string
+		suffix?: string,
+		options?: IAsyncStorageOptions
 	): IAsyncStorage {
 		let provider:
 			| void
@@ -84,6 +90,25 @@ export class AsyncStorage<T = StorageValueType> implements IAsyncStorage<T> {
 			| IAsyncStorage = undefined;
 
 		let storage: AsyncStorage | null = null;
+
+		// An explicit `defaultProvider` overrides the strategy-based selection
+		// below and decides which provider backs the storage.
+		const defaultProvider = options?.defaultProvider;
+
+		if (defaultProvider != null) {
+			if (defaultProvider === 'local') {
+				provider = canUsePersistentStorage('localStorage')
+					? new LocalStorageProvider(StorageKey + (suffix || ''))
+					: new MemoryStorageProvider();
+			} else if (defaultProvider === 'memory') {
+				provider = new MemoryStorageProvider();
+			} else {
+				// A custom IAsyncStorage implementation, used as-is.
+				provider = defaultProvider;
+			}
+
+			return new AsyncStorage(Promise.resolve(provider), suffix);
+		}
 
 		if (
 			persistentOrStrategy === 'localStorage' ||

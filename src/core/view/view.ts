@@ -165,7 +165,7 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 	 */
 	@cache
 	get asyncStorage(): IAsyncStorage {
-		return AsyncStorage.makeStorage(true, this.id);
+		return AsyncStorage.makeStorage(true, this.id, this.o.asyncStorage);
 	}
 
 	/**

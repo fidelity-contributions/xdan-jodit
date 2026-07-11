@@ -29,6 +29,7 @@ import type {
 	Attributes,
 	ButtonsOption,
 	Controls,
+	IAsyncStorageOptions,
 	IControlType,
 	IDictionary,
 	IExtraPlugin,
@@ -413,6 +414,28 @@ class Config implements IViewOptions {
 	 * if set true, then the current mode is saved in a cookie, and is restored after a reload of the page
 	 */
 	saveModeInStorage: boolean = false;
+
+	/**
+	 * Configure the provider that backs {@link IViewBased.asyncStorage}.
+	 *
+	 * By default the editor's `asyncStorage` uses persistent `IndexedDB` (with an
+	 * in-memory fallback when it is unavailable). Set `defaultProvider` to override it:
+	 * - `'local'` — persist in `localStorage`;
+	 * - `'memory'` — keep everything in memory (nothing survives a reload);
+	 * - a custom {@link IAsyncStorage} implementation — plug in your own backend.
+	 *
+	 * ```javascript
+	 * Jodit.make('#editor', {
+	 *    asyncStorage: { defaultProvider: 'local' }
+	 * });
+	 *
+	 * // or a fully custom backend
+	 * Jodit.make('#editor', {
+	 *    asyncStorage: { defaultProvider: myAsyncStorage }
+	 * });
+	 * ```
+	 */
+	asyncStorage: IAsyncStorageOptions = {};
 
 	/**
 	 * Class name that can be appended to the editable area

@@ -25,7 +25,11 @@ import type {
 	Nullable
 } from './types';
 import type { Attributes, ICreate } from './create';
-import type { IAsyncStorage, IStorage } from './storage';
+import type {
+	IAsyncStorage,
+	IAsyncStorageOptions,
+	IStorage
+} from './storage';
 import type { IUIButtonState } from './ui';
 import type { IEventEmitter } from './events';
 import type { IPluginButton } from './plugin';
@@ -64,6 +68,14 @@ interface IViewOptions extends ILanguageOptions, IToolbarOptions {
 	 * Use cache for heavy methods
 	 */
 	cache?: boolean;
+
+	/**
+	 * Configure the provider that backs {@link IViewBased.asyncStorage}.
+	 * By default it uses persistent `IndexedDB` (with an in-memory fallback);
+	 * set `defaultProvider` to `'local'`, `'memory'` or a custom
+	 * {@link IAsyncStorage} implementation to override it.
+	 */
+	asyncStorage?: IAsyncStorageOptions;
 
 	getIcon?: (name: string, clearName: string) => CanUndef<string>;
 

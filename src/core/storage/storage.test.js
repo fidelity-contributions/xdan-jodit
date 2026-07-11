@@ -47,6 +47,18 @@ describe('Storage', () => {
 				expect(provider.exists('key1')).is.false;
 			});
 
+			it('Should delete only the requested key and keep the others', () => {
+				provider.set('key1', 'value1');
+				provider.set('key2', 'value2');
+				provider.set('key3', 'value3');
+
+				provider.delete('key2');
+
+				expect(provider.exists('key2')).is.false;
+				expect(provider.get('key1')).equals('value1');
+				expect(provider.get('key3')).equals('value3');
+			});
+
 			it('Should clear all data', () => {
 				provider.set('key1', 'value1');
 				provider.set('key2', 'value2');

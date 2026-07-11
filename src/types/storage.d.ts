@@ -31,3 +31,20 @@ export interface IAsyncStorage<T = StorageValueType> {
 	clear(): Promise<this>;
 	close(): Promise<void>;
 }
+
+/**
+ * Which provider should back an {@link IAsyncStorage} created by
+ * `AsyncStorage.makeStorage`:
+ * - `'local'` — use `localStorage` (falls back to memory if it is blocked);
+ * - `'memory'` — use an in-memory store (nothing survives a page reload);
+ * - a custom {@link IAsyncStorage} implementation — use it as-is.
+ */
+export type AsyncStorageDefaultProvider = 'local' | 'memory' | IAsyncStorage;
+
+export interface IAsyncStorageOptions {
+	/**
+	 * Overrides the provider that backs the storage. When omitted the storage
+	 * behaves as before — persistent `IndexedDB` with an in-memory fallback.
+	 */
+	defaultProvider?: AsyncStorageDefaultProvider;
+}

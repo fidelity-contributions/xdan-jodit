@@ -70,7 +70,15 @@ export class LocalStorageProvider<T = StorageValueType> implements IStorage<T> {
 
 	delete(key: string): this {
 		try {
-			this.storage.removeItem(this.rootKey);
+			const buffer = this.storage.getItem(this.rootKey);
+
+			if (buffer) {
+				const json = JSON.parse(buffer);
+
+				delete json[key];
+
+				this.storage.setItem(this.rootKey, JSON.stringify(json));
+			}
 		} catch {}
 
 		return this;

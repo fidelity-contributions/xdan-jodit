@@ -512,6 +512,98 @@ describe('AsyncStorage', () => {
 				expect(value).equals(null);
 			});
 		});
+
+		describe('options.defaultProvider (third argument)', () => {
+			afterEach(() => {
+				localStorage.clear();
+			});
+
+			it("'local' should back the storage with localStorage", async () => {
+				const storage = AsyncStorage.makeStorage(true, 'optLocal', {
+					defaultProvider: 'local'
+				});
+
+				await storage.set('key1', 'value1');
+				expect(await storage.get('key1')).equals('value1');
+
+				// Persisted to localStorage, not IndexedDB
+				expect(localStorage.length).is.above(0);
+
+				await storage.clear();
+			});
+
+			it("'memory' should work but not persist to localStorage", async () => {
+				const storage = AsyncStorage.makeStorage(true, 'optMemory', {
+					defaultProvider: 'memory'
+				});
+
+				await storage.set('key1', 'value1');
+				expect(await storage.get('key1')).equals('value1');
+				expect(localStorage.length).equals(0);
+				expect(await storage.provider).instanceof(
+					Jodit.modules.MemoryStorageProvider
+				);
+			});
+
+			it('Should override the strategy passed in the first argument', async () => {
+				// First argument asks for IndexedDB, but options force memory
+				const storage = AsyncStorage.makeStorage(
+					'indexedDB',
+					'optOverride',
+					{ defaultProvider: 'memory' }
+				);
+
+				expect(await storage.provider).instanceof(
+					Jodit.modules.MemoryStorageProvider
+				);
+
+				await storage.set('key1', 'value1');
+				expect(await storage.get('key1')).equals('value1');
+			});
+
+			it('Should use a custom IAsyncStorage implementation as-is', async () => {
+				const calls = [];
+				const custom = {
+					store: new Map(),
+					async set(key, value) {
+						calls.push(['set', key]);
+						this.store.set(key, value);
+						return this;
+					},
+					async get(key) {
+						calls.push(['get', key]);
+						return this.store.get(key);
+					},
+					async delete(key) {
+						this.store.delete(key);
+						return this;
+					},
+					async exists(key) {
+						return this.store.has(key);
+					},
+					async clear() {
+						this.store.clear();
+						return this;
+					},
+					async close() {}
+				};
+
+				const storage = AsyncStorage.makeStorage(true, 'optCustom', {
+					defaultProvider: custom
+				});
+
+				expect(await storage.provider).equals(custom);
+
+				await storage.set('key1', 'value1');
+				expect(await storage.get('key1')).equals('value1');
+
+				// The facade still namespaces keys (prefix + camelCase) before
+				// delegating to the custom provider.
+				expect(calls[0][0]).equals('set');
+				expect(calls[0][1]).not.equals('key1');
+				expect(calls[0][1]).contains('Jodit');
+			});
+		});
 	});
 
 	describe('Integration with Jodit editor', () => {
@@ -521,6 +613,55 @@ describe('AsyncStorage', () => {
 
 		it('Should have canUseIndexedDB utility function available', () => {
 			expect(Jodit.modules.canUseIndexedDB).is.not.undefined;
+		});
+
+		describe('asyncStorage config option', () => {
+			it('Should back jodit.asyncStorage with memory when configured', async () => {
+				const editor = getJodit({
+					asyncStorage: { defaultProvider: 'memory' }
+				});
+
+				expect(await editor.asyncStorage.provider).instanceof(
+					Jodit.modules.MemoryStorageProvider
+				);
+
+				editor.destruct();
+			});
+
+			it('Should back jodit.asyncStorage with a custom provider', async () => {
+				const custom = {
+					store: new Map(),
+					async set(k, v) {
+						this.store.set(k, v);
+						return this;
+					},
+					async get(k) {
+						return this.store.get(k);
+					},
+					async delete(k) {
+						this.store.delete(k);
+						return this;
+					},
+					async exists(k) {
+						return this.store.has(k);
+					},
+					async clear() {
+						this.store.clear();
+						return this;
+					},
+					async close() {}
+				};
+
+				const editor = getJodit({
+					asyncStorage: { defaultProvider: custom }
+				});
+
+				await editor.asyncStorage.set('draft', 'hello');
+				expect(await editor.asyncStorage.get('draft')).equals('hello');
+				expect(await editor.asyncStorage.provider).equals(custom);
+
+				editor.destruct();
+			});
 		});
 
 		describe('canUseIndexedDB', () => {
