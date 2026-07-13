@@ -9,7 +9,7 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
-## Unreleased
+## 4.13.1
 
 #### :rocket: New Feature
 
@@ -18,6 +18,10 @@
 #### :bug: Bug Fix
 
 - **Storage**: `LocalStorageProvider.delete(key)` removed the entire storage scope (every key sharing the same `rootKey`/suffix) instead of just the requested key — `delete` behaved identically to `clear`. It now reads the JSON blob, drops only that key and writes the rest back. Affects `Jodit.modules.Storage`/`buffer`/`storage` and the `@persistent` decorator when a single key is deleted.
+
+#### :house: Internal
+
+- **Selection**: `Select.wrapInTagGen` no longer relies on the browser's `document.execCommand('fontSize', false, '7')` to split a non-collapsed selection into wrappable inline fragments. It now uses a pure-DOM implementation that splits the boundary text nodes and wraps every contiguous run of selected inline content (grouped per block) into a `<font>` element. This removes one more dependency on the deprecated `execCommand` API and makes selection wrapping (`commitStyle`, bold/italic/font/color, `wrapInTag`) behave identically across Chrome and Firefox. No public API or output change; covered by new `wrapInTag` tests.
 
 ## 4.12.42
 

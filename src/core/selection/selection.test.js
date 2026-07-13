@@ -1032,4 +1032,97 @@ describe('Selection Module Tests', function () {
 			});
 		});
 	});
+
+	describe('wrapInTag', () => {
+		// Directly exercises the pure-DOM selection fragmentation that
+		// replaced the native `execCommand('fontsize', false, '7')` trick.
+		// `<span>` is used as a neutral, easy-to-read wrapper tag.
+		[
+			{
+				name: 'Whole text of a block',
+				from: '<p>|test|</p>',
+				to: '<p><span>test</span></p>'
+			},
+			{
+				name: 'Middle of a single text node (split at both ends)',
+				from: '<p>a|bc|d</p>',
+				to: '<p>a<span>bc</span>d</p>'
+			},
+			{
+				name: 'From the start of a text node',
+				from: '<p>|ab|cd</p>',
+				to: '<p><span>ab</span>cd</p>'
+			},
+			{
+				name: 'To the end of a text node',
+				from: '<p>ab|cd|</p>',
+				to: '<p>ab<span>cd</span></p>'
+			},
+			{
+				name: 'Partially inside a nested inline element',
+				from: '<p>a<strong>b|c|d</strong>e</p>',
+				to: '<p>a<strong>b<span>c</span>d</strong>e</p>'
+			},
+			{
+				name: 'Around a whole inline element with text on both sides',
+				from: '<p>a|b<strong>cd</strong>e|f</p>',
+				to: '<p>a<span>b<strong>cd</strong>e</span>f</p>'
+			},
+			{
+				name: 'Across two sibling inline elements (one run per parent)',
+				from: '<p><em>a|b</em><strong>c|d</strong></p>',
+				to: '<p><em>a<span>b</span></em><strong><span>c</span>d</strong></p>'
+			},
+			{
+				name: 'Two fully selected blocks (one wrapper per block)',
+				from: '<p>|one</p><p>two|</p>',
+				to: '<p><span>one</span></p><p><span>two</span></p>'
+			},
+			{
+				name: 'Selection crossing a block boundary',
+				from: '<p>on|e</p><p>t|wo</p>',
+				to: '<p>on<span>e</span></p><p><span>t</span>wo</p>'
+			}
+		].forEach(({ name, from, to }) => {
+			describe(name, () => {
+				it('Should wrap every selected fragment in the tag', () => {
+					const editor = getJodit();
+					editor.value = from;
+					setCursorToChar(editor);
+
+					editor.s.wrapInTag('span');
+
+					expect(sortAttributes(editor.value)).equals(to);
+				});
+			});
+		});
+
+		describe('Callback form', () => {
+			it('Should call the callback for every selected fragment', () => {
+				const editor = getJodit();
+				editor.value = '<p>on|e</p><p>t|wo</p>';
+				setCursorToChar(editor);
+
+				const chunks = [];
+				editor.s.wrapInTag(font => {
+					chunks.push(font.textContent);
+				});
+
+				expect(chunks).deep.equals(['e', 't']);
+			});
+		});
+
+		describe('Return value', () => {
+			it('Should return the created wrapper elements', () => {
+				const editor = getJodit();
+				editor.value = '<p>|one</p><p>two|</p>';
+				setCursorToChar(editor);
+
+				const result = editor.s.wrapInTag('span');
+
+				expect(result.length).equals(2);
+				expect(result.every(el => el.tagName === 'SPAN')).is.true;
+			});
+		});
+	});
 });

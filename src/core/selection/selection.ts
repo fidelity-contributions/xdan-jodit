@@ -1234,6 +1234,190 @@ export class Selection implements ISelect {
 	}
 
 	/**
+	 * Splits the boundaries of the current selection and wraps every
+	 * contiguous run of selected inline content (grouped by block) into a
+	 * `<font>` element, returning those wrappers in document order.
+	 *
+	 * This is a pure-DOM replacement for the old
+	 * `nativeExecCommand('fontsize', false, '7')` trick which relied on the
+	 * browser to split the selection into `<font size="7">` fragments.
+	 */
+	private __wrapSelectionFragments(): HTMLElement[] {
+		const range = this.range;
+
+		this.__splitSelectionBoundaries(range);
+
+		let root: Nullable<Node> = range.commonAncestorContainer;
+
+		if (Dom.isText(root)) {
+			root = root.parentNode;
+		}
+
+		if (!root) {
+			return [];
+		}
+
+		return this.__wrapSelectionRuns(
+			this.__collectContainedNodes(root, range)
+		);
+	}
+
+	/**
+	 * Splits the text nodes at both ends of the range so that its boundaries
+	 * always fall between nodes. Afterwards every node inside the range is
+	 * fully (not partially) selected.
+	 */
+	private __splitSelectionBoundaries(range: Range): void {
+		let { startContainer, endContainer } = range;
+		let { startOffset, endOffset } = range;
+
+		if (
+			Dom.isText(endContainer) &&
+			endOffset > 0 &&
+			endOffset < (endContainer.nodeValue?.length ?? 0)
+		) {
+			endContainer.splitText(endOffset);
+			endOffset = endContainer.nodeValue?.length ?? endOffset;
+		}
+
+		if (
+			Dom.isText(startContainer) &&
+			startOffset > 0 &&
+			startOffset < (startContainer.nodeValue?.length ?? 0)
+		) {
+			const middle = startContainer.splitText(startOffset);
+
+			// Selection located inside a single text node - the tail we just
+			// cut off is the actual selected fragment.
+			if (startContainer === endContainer) {
+				endContainer = middle;
+				endOffset = middle.nodeValue?.length ?? 0;
+			}
+
+			startContainer = middle;
+			startOffset = 0;
+		}
+
+		range.setStart(startContainer, startOffset);
+		range.setEnd(endContainer, endOffset);
+
+		// Normalize text-edge boundaries (e.g. `(text, 0)` or `(text, length)`)
+		// to the element level so that containment checks based on
+		// `selectNode()` treat a fully selected text node as contained.
+		this.__normalizeRangeBoundary(range, true);
+		this.__normalizeRangeBoundary(range, false);
+	}
+
+	private __normalizeRangeBoundary(range: Range, atStart: boolean): void {
+		const container = atStart ? range.startContainer : range.endContainer;
+
+		if (!Dom.isText(container)) {
+			return;
+		}
+
+		const offset = atStart ? range.startOffset : range.endOffset;
+		const length = container.nodeValue?.length ?? 0;
+
+		if (offset === 0) {
+			atStart
+				? range.setStartBefore(container)
+				: range.setEndBefore(container);
+		} else if (offset >= length) {
+			atStart
+				? range.setStartAfter(container)
+				: range.setEndAfter(container);
+		}
+	}
+
+	/**
+	 * Collects the highest-level nodes that are completely inside the range,
+	 * descending into nodes that are only partially selected.
+	 */
+	private __collectContainedNodes(root: Node, range: Range): Node[] {
+		const result: Node[] = [];
+
+		toArray(root.childNodes).forEach(child => {
+			if (this.__isFullyContained(range, child)) {
+				result.push(child);
+			} else if (child.childNodes.length && range.intersectsNode(child)) {
+				result.push(...this.__collectContainedNodes(child, range));
+			}
+		});
+
+		return result;
+	}
+
+	private __isFullyContained(range: Range, node: Node): boolean {
+		const nodeRange = this.createRange();
+		nodeRange.selectNode(node);
+
+		return (
+			range.compareBoundaryPoints(Range.START_TO_START, nodeRange) <= 0 &&
+			range.compareBoundaryPoints(Range.END_TO_END, nodeRange) >= 0
+		);
+	}
+
+	/**
+	 * Wraps every contiguous run of selected inline siblings into a `<font>`
+	 * element. Block-level nodes are never wrapped themselves - their inline
+	 * content is wrapped instead, keeping every `<font>` inside a single block.
+	 */
+	private __wrapSelectionRuns(nodes: Node[]): HTMLElement[] {
+		const fonts: HTMLElement[] = [];
+		let run: Node[] = [];
+
+		const flush = (): void => {
+			if (run.length) {
+				fonts.push(this.__wrapRunInFont(run));
+				run = [];
+			}
+		};
+
+		nodes.forEach(node => {
+			if (Dom.isElement(node) && this.__isOrContainsBlock(node)) {
+				flush();
+				fonts.push(
+					...this.__wrapSelectionRuns(toArray(node.childNodes))
+				);
+			} else {
+				if (
+					run.length &&
+					run[run.length - 1].parentNode !== node.parentNode
+				) {
+					flush();
+				}
+
+				run.push(node);
+			}
+		});
+
+		flush();
+
+		return fonts;
+	}
+
+	private __isOrContainsBlock(node: Node): boolean {
+		if (Dom.isBlock(node)) {
+			return true;
+		}
+
+		return toArray(node.childNodes).some(child =>
+			this.__isOrContainsBlock(child)
+		);
+	}
+
+	private __wrapRunInFont(run: Node[]): HTMLElement {
+		const font = this.j.createInside.element('font');
+		const [first] = run;
+
+		first.parentNode?.insertBefore(font, first);
+
+		run.forEach(node => font.appendChild(node));
+
+		return font;
+	}
+
+	/**
 	 * Wrap all selected fragments inside Tag or apply some callback
 	 */
 	*wrapInTagGen(fakes?: Node[]): Generator<HTMLElement, undefined> {
@@ -1255,24 +1439,7 @@ export class Selection implements ISelect {
 			return;
 		}
 
-		// fix issue https://github.com/xdan/jodit/issues/65
-		$$('*[style*=font-size]', this.area).forEach(elm => {
-			attr(elm, 'data-font-size', elm.style.fontSize.toString());
-			elm.style.removeProperty('font-size');
-		});
-
-		this.j.nativeExecCommand('fontsize', false, '7');
-
-		$$('*[data-font-size]', this.area).forEach(elm => {
-			const fontSize = attr(elm, 'data-font-size');
-
-			if (fontSize) {
-				elm.style.fontSize = fontSize;
-				attr(elm, 'data-font-size', null);
-			}
-		});
-
-		const elms = $$('font[size="7"]', this.area);
+		const elms = this.__wrapSelectionFragments();
 
 		for (const font of elms) {
 			const { firstChild, lastChild } = font;
