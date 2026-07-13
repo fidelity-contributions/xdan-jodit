@@ -14,6 +14,7 @@
 #### :rocket: New Feature
 
 - **AsyncStorage**: `AsyncStorage.makeStorage(persistentOrStrategy, suffix, options?)` now accepts a third `options` argument with a `defaultProvider` field that overrides which provider backs the storage — `'local'` (localStorage), `'memory'`, or a custom `IAsyncStorage` implementation. When omitted the behaviour is unchanged (persistent IndexedDB with an in-memory fallback). The same option is exposed on the editor as the `asyncStorage` config option (`Jodit.make('#editor', { asyncStorage: { defaultProvider: 'local' } })`), so `jodit.asyncStorage` can be pointed at localStorage, memory, or your own backend without subclassing.
+- **Slots**: a new `above` workplace slot (`editor.currentPlace.slots.above`) that always stays **above the toolbar** — the spot Google-Docs-style presence bars and banners live in. The toolbar box used to re-pin itself as the container's first child on every `toolbarContainer` access; it now keeps itself below any container children flagged with the `data-jodit-above-toolbar` attribute (the new slot carries the flag). The slot renders as nothing while empty and gets the standard border-bottom once filled, like the other slots.
 
 #### :bug: Bug Fix
 
