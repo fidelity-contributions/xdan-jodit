@@ -49,13 +49,31 @@ export abstract class ViewWithToolbar extends View implements IViewWithToolbar {
 			return resolveElement(this.o.toolbar, this.o.shadowRoot || this.od);
 		}
 
-		this.o.toolbar &&
-			Dom.appendChildFirst(
-				this.container,
-				this.__defaultToolbarContainer
-			);
+		this.o.toolbar && this.__appendToolbarBox();
 
 		return this.__defaultToolbarContainer;
+	}
+
+	/**
+	 * Keep the toolbar box as the first child of the container, except that
+	 * children flagged with `data-jodit-above-toolbar` (e.g. the `above`
+	 * workplace slot used for presence bars and banners) stay above it.
+	 */
+	private __appendToolbarBox(): void {
+		const box = this.__defaultToolbarContainer;
+		let anchor = this.container.firstElementChild;
+
+		while (
+			anchor &&
+			anchor !== box &&
+			anchor.hasAttribute('data-jodit-above-toolbar')
+		) {
+			anchor = anchor.nextElementSibling;
+		}
+
+		if (anchor !== box) {
+			this.container.insertBefore(box, anchor);
+		}
 	}
 
 	/**

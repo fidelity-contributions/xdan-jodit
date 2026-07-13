@@ -9,6 +9,7 @@ describe('Test editor slots system', function () {
 		it('Should create all slot elements', function () {
 			const editor = getJodit();
 
+			expect(editor.currentPlace.slots.above).is.not.null;
 			expect(editor.currentPlace.slots.top).is.not.null;
 			expect(editor.currentPlace.slots.bottom).is.not.null;
 			expect(editor.currentPlace.slots.center).is.not.null;
@@ -40,6 +41,32 @@ describe('Test editor slots system', function () {
 					'jodit-jodit__workplace-slot_right_true'
 				)
 			).is.true;
+		});
+
+		it('Should keep the above slot ABOVE the toolbar box', function () {
+			const editor = getJodit();
+
+			const above = editor.currentPlace.slots.above;
+			expect(above.hasAttribute('data-jodit-above-toolbar')).is.true;
+			expect(
+				above.classList.contains(
+					'jodit-jodit__workplace-slot_above_true'
+				)
+			).is.true;
+
+			// The toolbar box must come AFTER the above slot in the container…
+			const box = editor.toolbarContainer;
+			expect(box.parentElement).equals(editor.container);
+			expect(
+				above.compareDocumentPosition(box) &
+					Node.DOCUMENT_POSITION_FOLLOWING
+			).is.above(0);
+
+			// …and stay there even after the getter re-attaches the box.
+			above.appendChild(editor.c.element('div'));
+			const boxAgain = editor.toolbarContainer;
+			expect(boxAgain).equals(box);
+			expect(above.nextElementSibling).equals(box);
 		});
 
 		it('Should hide empty slots', function () {

@@ -1417,6 +1417,13 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 
 		const SLOT = 'workplace-slot';
 
+		// A slot that always stays ABOVE the toolbar (presence bars, banners…).
+		// The `data-jodit-above-toolbar` attribute tells ViewWithToolbar to keep
+		// the toolbar box below it when (re)attaching the toolbar container.
+		const aboveSlot = this.c.div(this.getFullElName(SLOT, 'above'), NOEDIT);
+		aboveSlot.setAttribute('data-jodit-above-toolbar', '');
+		Dom.appendChildFirst(container, aboveSlot);
+
 		const topSlot = this.c.div(this.getFullElName(SLOT, 'top'), NOEDIT);
 
 		container.appendChild(topSlot);
@@ -1468,6 +1475,7 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 			container,
 			workplace,
 			slots: {
+				above: aboveSlot,
 				top: topSlot,
 				bottom: bottomPanel,
 				center: centerSlot,

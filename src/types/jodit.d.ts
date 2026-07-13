@@ -31,6 +31,8 @@ interface IWorkPlace {
 	container: HTMLDivElement;
 	workplace: HTMLDivElement;
 	slots: {
+		/** Sits above the toolbar (presence bars, banners). */
+		above: HTMLDivElement;
 		top: HTMLDivElement;
 		bottom: HTMLDivElement;
 		center: HTMLDivElement;
