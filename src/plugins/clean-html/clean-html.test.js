@@ -832,6 +832,21 @@ describe('Clean html plugin', function () {
 			});
 		});
 
+		describe('smuggled HTML in MathML/SVG', function () {
+			it('Should neutralize HTML smuggled into MathML or SVG when parsed in a disconnected fragment', function () {
+				const editor = getJodit({
+					cleanHTML: { useIframeSandbox: false }
+				});
+				editor.value =
+					'<math><mglyph><html><body onload="alert(1)"></body></html></mglyph></math>';
+				// The executable vector must be gone in every browser. Chrome strips the
+				// smuggled `<body>`/`<html>` entirely; Firefox keeps them as inert
+				// MathML-namespaced nodes without the handler — both are safe.
+				expect(editor.value).does.not.contain('onload');
+				expect(editor.value).does.not.contain('alert');
+			});
+		});
+
 		describe('denyTags (default: script,iframe,object,embed)', function () {
 			['script', 'iframe', 'object', 'embed'].forEach(function (tag) {
 				it('Should remove <' + tag + '> by default', function (done) {

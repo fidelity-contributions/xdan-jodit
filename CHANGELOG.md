@@ -9,6 +9,17 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.13.4
+
+#### :bug: Bug Fix
+
+- **Security / clean-html**: HTML smuggled into MathML/SVG (e.g. `<math><mglyph><html><body onload>`) is now stripped even when clean-html parses the fragment in a disconnected sandbox (`useIframeSandbox: false`). The guard used `isConnected`, which is `false` for a detached parse box, so the smuggled node slipped through; it now uses `box.contains()`. Fixes GHSA-rxcw-mc6f-6hr3 (mutation XSS via MathML/style rawtext carrier). Thanks @MatrixNeoKozak (#1380).
+- **safeHTML**: guard `location` access when neutralising `javascript:` links so `sanitizeHTMLElement` no longer throws a `ReferenceError` in SSR / Node environments where `location` is undefined (#1380).
+
+#### :house: Internal
+
+- **Dependencies**: security bumps for `tar` 7.5.16, `form-data` 4.0.6, `js-yaml` 4.3.0, `launch-editor` 2.14.1, `webpack-dev-server` 5.2.5 (+ `http-proxy-middleware` 2.0.9), `ws` 8.21.1 / `engine.io` 6.6.9 / `socket.io-adapter` 2.5.8, and `websocket-driver` 0.7.5 (Dependabot alerts #189–#197). All dev/test-only. (#1373, #1374, #1375, #1376, #1377, #1382, #1383)
+
 ## 4.13.3
 
 #### :rocket: New Feature
