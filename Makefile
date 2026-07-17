@@ -135,7 +135,7 @@ ifeq ($(BUILD_ESM), true)
 esm:
 	@echo 'Build esm modules ...' $(BUILD_ESM)
 	rm -rf $(pwd)/build/esm
-	tsc -p $(pwd)/tsconfig.esm.json --rootDir $(pwd)/src --importHelpers false --allowJs true --checkJs false --excludeDirectories $(pwd)/node_modules --removeComments false --sourceMap false --outDir $(pwd)/build/esm
+	$(NODE_MODULES_BIN)/tsc -p $(pwd)/tsconfig.esm.json --rootDir $(pwd)/src --importHelpers false --allowJs true --checkJs false --excludeDirectories $(pwd)/node_modules --removeComments false --sourceMap false --outDir $(pwd)/build/esm
 
 	@echo 'Remove style imports ...'
 	@$(NODE_MODULES_BIN)/replace "import .+\.(less|css)('|\");" '' $(pwd)/build/esm -r --silent

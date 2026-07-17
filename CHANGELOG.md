@@ -9,6 +9,12 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.13.5
+
+#### :house: Internal
+
+- **Build**: pin the ESM build to the project's TypeScript (`node_modules/.bin/tsc`) instead of a bare `tsc` resolved from `PATH`. The `4.13.4` publish build broke after the GitHub runner image began shipping a newer global TypeScript that rejects options (`baseUrl`, `downlevelIteration`, `moduleResolution: "node"`) which the project's pinned TypeScript 6.0.2 still accepts. This re-releases the 4.13.4 security fixes, which never reached npm.
+
 ## 4.13.4
 
 #### :bug: Bug Fix
