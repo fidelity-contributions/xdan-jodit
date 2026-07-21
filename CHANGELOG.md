@@ -9,6 +9,13 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.13.6
+
+#### :bug: Bug Fix
+
+- **Security / clean-html**: a `<script>` nested directly inside `<svg>` (or MathML) is now removed by `denyTags`. The deny/allow tag filter matched `node.nodeName` against an upper-cased hash, but foreign-namespaced elements keep their original case (an SVG `<script>` reports `"script"`, not `"SCRIPT"`), so the script slipped through the default `denyTags` and executed when the value was loaded into the editor. The lookup now normalises the tag name to upper case, so namespace can't bypass the filter — while still honouring `allowTags`. Fixes GHSA-45qg-252v-3f7p. Thanks to Roman Kis for the report.
+- **Toolbar**: fixed `TypeError: Cannot redefine property: component` thrown when the editor is created with `cache: false`. `ToolbarButton.createContainer` (decorated with `@cacheHTML`) defined the `component` back-reference on the button element without `configurable`, i.e. non-configurable. With caching enabled the container is cloned (which drops the property), hiding the problem; with `cache: false` the container isn't cloned, so a button built after an editor became ready reached the constructor still carrying that non-configurable property and the constructor's redefine threw. The property is now defined as configurable, matching the base `UIElement`.
+
 ## 4.13.5
 
 #### :house: Internal

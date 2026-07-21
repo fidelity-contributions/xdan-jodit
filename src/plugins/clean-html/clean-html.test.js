@@ -847,6 +847,31 @@ describe('Clean html plugin', function () {
 			});
 		});
 
+		describe('script inside SVG', function () {
+			// GHSA-45qg-252v-3f7p: a <script> nested directly in <svg> is
+			// SVG-namespaced (nodeName "script", not "SCRIPT"), so it slipped
+			// past the case-sensitive denyTags lookup and executed when loaded
+			// into the editor.
+			it('Should remove a <script> nested inside <svg>', function (done) {
+				const editor = getJodit({
+					cleanHTML: { timeout: 0 }
+				});
+				editor.value =
+					'<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 124 124">' +
+					'<rect width="124" height="124" rx="24" fill="#000"></rect>' +
+					'<script type="text/javascript">alert(0x539);</scr' +
+					'ipt></svg>';
+
+				editor.e.on('finishedCleanHTMLWorker', () => {
+					expect(editor.value).does.not.contain('alert');
+					expect(editor.value.toLowerCase()).does.not.contain(
+						'<script'
+					);
+					done();
+				});
+			});
+		});
+
 		describe('denyTags (default: script,iframe,object,embed)', function () {
 			['script', 'iframe', 'object', 'embed'].forEach(function (tag) {
 				it('Should remove <' + tag + '> by default', function (done) {

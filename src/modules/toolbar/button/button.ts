@@ -182,7 +182,8 @@ export class ToolbarButton<T extends IViewBased = IViewBased>
 		button.classList.add(cn + '__button');
 
 		Object.defineProperty(button, 'component', {
-			value: this
+			value: this,
+			configurable: true
 		});
 
 		container.appendChild(button);

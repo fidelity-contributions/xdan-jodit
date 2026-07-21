@@ -5,6 +5,32 @@
  */
 
 describe('Test interface', function () {
+	describe('Toolbar buttons when options.cache is disabled', function () {
+		// Regression: ToolbarButton.createContainer (@cacheHTML) defined
+		// `component` on the button element without `configurable`, i.e.
+		// non-configurable. The constructor then redefines it. With
+		// cache:false the container is not cloned, so a button built after an
+		// editor has become ready reaches the constructor already carrying a
+		// non-configurable `component` -> "Cannot redefine property: component".
+		it('Should build a second editor without throwing', () => {
+			const first = getJodit({ cache: false });
+			first.destruct();
+
+			const second = getJodit({ cache: false });
+
+			expect(
+				second.container.querySelectorAll('.jodit-toolbar-button')
+					.length
+			).above(0);
+
+			const button = second.container.querySelector(
+				'.jodit-toolbar-button button'
+			);
+			expect(button).is.not.null;
+			expect(button.component).is.not.null;
+		});
+	});
+
 	describe('Style', function () {
 		it('Should apply style to the editable area', () => {
 			const editor = getJodit({

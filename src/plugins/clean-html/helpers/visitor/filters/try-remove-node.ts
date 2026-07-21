@@ -54,7 +54,15 @@ function isRemovableNode(
 	deny: IDictionary | false
 ): boolean {
 	if (!Dom.isText(node)) {
-		if (allow && !allow[node.nodeName]) {
+		// The allow/deny hashes are keyed by upper-cased tag name. HTML
+		// `nodeName` is already upper-case, but foreign (SVG/MathML) elements
+		// keep their original case — an SVG `<script>` reports `"script"`, so a
+		// case-sensitive lookup let it slip past `denyTags` and execute. Normalise
+		// to upper case so namespace can't bypass the filter. See
+		// GHSA-45qg-252v-3f7p.
+		const name = node.nodeName.toUpperCase();
+
+		if (allow && !allow[name]) {
 			return true;
 		}
 
@@ -63,10 +71,10 @@ function isRemovableNode(
 		// — otherwise the embed is stripped ~300ms after insertion (#1381).
 		// Arbitrary/bare iframes stay denied.
 		const isTrustedEmbed =
-			node.nodeName === 'IFRAME' &&
+			name === 'IFRAME' &&
 			isAllowedMediaEmbed(attr(node as Element, 'src') || '');
 
-		if (!allow && deny && deny[node.nodeName] && !isTrustedEmbed) {
+		if (!allow && deny && deny[name] && !isTrustedEmbed) {
 			return true;
 		}
 	}
