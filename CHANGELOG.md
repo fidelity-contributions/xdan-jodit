@@ -9,6 +9,12 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.13.8
+
+#### :house: Internal
+
+- **Dependencies**: security/maintenance bumps — `axios` 1.18.0, `webpack-dev-server` 5.2.6, `tar` 7.5.21, `svgo` 4.0.2, `fast-uri` 3.1.4 (Dependabot). All dev/build-only. (#1384, #1385, #1386, #1387, #1388)
+
 ## 4.13.7
 
 #### :bug: Bug Fix
