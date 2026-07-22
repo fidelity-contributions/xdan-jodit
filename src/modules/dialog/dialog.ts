@@ -751,6 +751,13 @@ export class Dialog extends ViewWithToolbar implements IDialog {
 			ConfigProto(Config.prototype.dialog, Dialog.defaultOptions)
 		) as IDialogOptions;
 
+		// Attach event handlers passed via `options.events` to the dialog's own
+		// emitter (as FileBrowser already does), so a consumer — e.g. a plugin
+		// forwarding the editor's `events` config — can observe `afterOpen` /
+		// `beforeClose`. Unlike popups, the dialog fires these on its own
+		// emitter, so without this they were unreachable from the editor.
+		self.attachEvents(self.options);
+
 		Dom.safeRemove(self.container);
 
 		const n = this.getFullElName.bind(this);

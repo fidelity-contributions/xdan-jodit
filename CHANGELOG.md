@@ -9,6 +9,12 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.13.7
+
+#### :bug: Bug Fix
+
+- **Dialog**: event handlers passed via `options.events` are now attached to the dialog's emitter (as `FileBrowser` already does). A dialog fires `afterOpen`/`beforeClose` on its own emitter — unlike popups, which fire on the editor emitter — so those events were previously unreachable from the editor. Plugins that open dialogs (e.g. the PRO Button Generator) can now forward the editor's `events` config so `afterOpen`/`beforeClose` can be observed. Reported by Ralf Pichler (uniquare.com, Jodit OEM).
+
 ## 4.13.6
 
 #### :bug: Bug Fix

@@ -116,6 +116,33 @@ describe('Dialog system tests', function () {
 		});
 	});
 
+	describe('Events passed via options.events', function () {
+		// Unlike popups (which fire on the editor emitter), a dialog fires
+		// afterOpen/beforeClose on its own emitter. Handlers passed via
+		// options.events must be attached to it, so a plugin can forward the
+		// editor's `events` config and observe open/close. Reported by Ralf
+		// Pichler (uniquare.com, Jodit OEM).
+		it('Should attach them to the dialog emitter and fire on open/close', function () {
+			let opened = 0;
+			let closed = 0;
+
+			const dialog = new Jodit.modules.Dialog({
+				events: {
+					afterOpen: () => opened++,
+					beforeClose: () => closed++
+				}
+			});
+
+			dialog.open('Hello', 'Title');
+			expect(opened).equals(1);
+
+			dialog.close();
+			expect(closed).equals(1);
+
+			dialog.destruct();
+		});
+	});
+
 	describe('About dialog', function () {
 		it('Should be opened when use clicks on the About button', function () {
 			getBox().style.width = '100%';
