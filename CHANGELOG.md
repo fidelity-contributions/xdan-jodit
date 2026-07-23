@@ -9,6 +9,12 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.13.10
+
+#### :house: Internal
+
+- **Repository**: added a `funding` field (and a GitHub Sponsor button) pointing to Jodit PRO, refreshed the README header, pinned all GitHub Actions to commit SHAs, and added Dependabot (actions + npm), a PR path-labeler, a first-interaction greeting, a surgical stale-issue bot and release-note categories. No runtime changes.
+
 ## 4.13.9
 
 #### :bug: Bug Fix
