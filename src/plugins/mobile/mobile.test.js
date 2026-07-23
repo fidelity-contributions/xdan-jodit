@@ -35,6 +35,37 @@ describe('Test mobile mode', function () {
 			expect(count()).to.eq(window.toolbarButtonsCountXS);
 		});
 
+		describe('When only a custom `buttons` list is set (no buttonsMD/SM/XS)', function () {
+			// #1389: resizing narrower switched to the group-based buttonsMD/SM/XS
+			// defaults, surfacing buttons the user never requested. Resizing must
+			// only ever drop buttons, never add ones outside `buttons`.
+			it('Should never show buttons that were not requested on resize', function () {
+				getBox().style.width = '1000px';
+				const editor = getJodit({
+					disablePlugins: ['speech-recognize'],
+					buttons: ['bold', 'italic', 'underline', 'strikethrough']
+				});
+
+				const count = () =>
+					editor.container.querySelectorAll(
+						'.jodit-toolbar__box .jodit-toolbar-button'
+					).length;
+
+				expect(count()).equals(4);
+				expect(getButton('image', editor)).to.be.null;
+
+				[790, 690, 390].forEach(width => {
+					getBox().style.width = width + 'px';
+					simulateEvent('resize', window);
+
+					expect(count()).equals(4);
+					expect(getButton('bold', editor)).to.be.not.null;
+					expect(getButton('image', editor)).to.be.null;
+					expect(getButton('ul', editor)).to.be.null;
+				});
+			});
+		});
+
 		describe('Disable plugins', () => {
 			it('Should remove buttons from these plugins for all sizes', () => {
 				getBox().style.width = '1000px';

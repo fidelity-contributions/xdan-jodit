@@ -9,6 +9,12 @@
 > - :house: [Internal]
 > - :nail_care: [Polish]
 
+## 4.13.9
+
+#### :bug: Bug Fix
+
+- **Mobile / adaptive toolbar**: with a custom `buttons` list and the default `buttonsMD`/`buttonsSM`/`buttonsXS`, resizing the editor narrower surfaced buttons that were never requested — the breakpoint sets are group-based defaults independent of `buttons`. The responsive breakpoint set is now constrained to `buttons`: resizing only ever drops buttons, never adds ones outside `buttons`. Set `buttonsMD`/`buttonsSM`/`buttonsXS` explicitly if you want a different per-breakpoint set. The default configuration (where `buttons` is the full superset) is unchanged. Fixes [#1389](https://github.com/xdan/jodit/issues/1389).
+
 ## 4.13.8
 
 #### :house: Internal

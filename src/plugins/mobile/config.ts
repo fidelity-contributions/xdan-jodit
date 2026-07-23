@@ -35,16 +35,26 @@ declare module 'jodit/config' {
 
 		/**
 		 * The list of buttons that appear in the editor's toolbar for medium-sized spaces (≥ options.sizeMD).
+		 *
+		 * The set is constrained to `buttons`: resizing may only drop buttons on
+		 * smaller widths, never surface a button that is not in `buttons`. So if
+		 * you customise only `buttons` and leave this at its default, a narrow
+		 * editor still shows just your `buttons`. Set this explicitly (as a subset
+		 * of `buttons`) to get a different medium-width set.
 		 */
 		buttonsMD: ButtonsOption;
 
 		/**
 		 * The list of buttons that appear in the editor's toolbar for small-sized spaces (≥ options.sizeSM).
+		 *
+		 * Constrained to `buttons` — see {@link buttonsMD}.
 		 */
 		buttonsSM: ButtonsOption;
 
 		/**
 		 * The list of buttons that appear in the editor's toolbar for extra-small spaces (less than options.sizeSM).
+		 *
+		 * Constrained to `buttons` — see {@link buttonsMD}.
 		 */
 		buttonsXS: ButtonsOption;
 	}

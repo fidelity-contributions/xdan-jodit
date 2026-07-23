@@ -152,6 +152,37 @@ const editor = Jodit.make('#editor', {
 });
 ```
 
+### Breakpoint sets are constrained to `buttons`
+
+`buttons` is treated as the full set of buttons the editor may ever show. The
+responsive breakpoint sets (`buttonsMD`/`buttonsSM`/`buttonsXS`) are intersected
+with `buttons`, so resizing the editor can only ever **drop** buttons on smaller
+widths — it never adds a button that is not in `buttons`.
+
+This matters when you customise only `buttons` and leave the breakpoint sets at
+their (group-based) defaults:
+
+```typescript
+const editor = Jodit.make('#editor', {
+    // only four buttons wanted, at every width
+    buttons: ['bold', 'italic', 'underline', 'strikethrough']
+});
+```
+
+On a narrow editor this still shows just those four buttons. Previously the
+editor fell back to the default `buttonsMD`/`buttonsSM`/`buttonsXS` groups and
+displayed many more buttons than were requested.
+
+If you actually want a *different* set at some breakpoint, set that breakpoint
+option explicitly (its buttons should be a subset of `buttons`):
+
+```typescript
+const editor = Jodit.make('#editor', {
+    buttons: ['bold', 'italic', 'underline', 'strikethrough', 'ul', 'ol'],
+    buttonsXS: ['bold', 'italic', 'dots']
+});
+```
+
 ### Disable Adaptive Toolbar
 
 ```typescript
