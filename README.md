@@ -1,17 +1,16 @@
-![Jodit WYSIWYG editor](https://raw.githubusercontent.com/xdan/jodit/main/examples/assets/logo.png)
+<div align="center">
+<img width="340" src="https://raw.githubusercontent.com/xdan/jodit/main/examples/assets/logo.png" alt="Jodit Editor">
+<h1>Jodit Editor</h1>
+<p>Pure-TypeScript WYSIWYG editor with a built-in file browser &amp; image editor.</p>
+<p>
+<a href="https://xdsoft.net/jodit/"><img src="https://img.shields.io/badge/%E2%96%B6%20Live%20Demo-1F2937?style=for-the-badge" height="34" alt="Live Demo"></a>
+&nbsp;
+<a href="https://xdsoft.net/jodit/pro/"><img src="https://img.shields.io/badge/Get%20Jodit%20PRO%20%E2%86%92-F5A623?style=for-the-badge" height="34" alt="Get Jodit PRO"></a>
+</p>
+</div>
 
-# Jodit Editor
+<br>
 
-Jodit Editor is an excellent WYSIWYG editor written in pure TypeScript
-without the use of additional libraries. It includes a file editor and image editor.
-
-[![Build Status](https://github.com/xdan/jodit/workflows/Run%20tests/badge.svg)](https://github.com/xdan/jodit/actions/workflows/tests.yml)
-[![npm version](https://badge.fury.io/js/jodit.svg)](https://badge.fury.io/js/jodit)
-[![npm](https://img.shields.io/npm/dm/jodit.svg)](https://www.npmjs.com/package/jodit)
-[![npm](https://img.shields.io/npm/dm/jodit-react.svg)](https://www.npmjs.com/package/jodit-react)
-
--   [Demo and Official site](https://xdsoft.net/jodit/)
--   [PRO Version](https://xdsoft.net/jodit/pro/)
 -   [Builder](https://xdsoft.net/jodit/builder/)
 -   [Playground - Play with Options](https://xdsoft.net/jodit/play.html)
 -   [Documentation](https://xdsoft.net/jodit/docs/)
@@ -21,8 +20,6 @@ without the use of additional libraries. It includes a file editor and image edi
 -   [TypeScript Starter](https://codesandbox.io/s/ggc6km)
 
 ## Get Started
-
-## How to Use
 
 Download the latest [release](https://github.com/xdan/jodit/releases/latest) or via npm:
 
@@ -100,9 +97,9 @@ You can manually include additional plugins and languages as needed.
 ```html
 <link
   rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/jodit/4.12.37/es2021/jodit.min.css"
+  href="https://cdnjs.cloudflare.com/ajax/libs/jodit/4.13.9/es2021/jodit.min.css"
 />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jodit/4.12.37/es2021/jodit.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jodit/4.13.9/es2021/jodit.min.js"></script>
 ```
 
 #### unpkg
@@ -110,9 +107,9 @@ You can manually include additional plugins and languages as needed.
 ```html
 <link
   rel="stylesheet"
-  href="https://unpkg.com/jodit@4.12.37/es2021/jodit.min.css"
+  href="https://unpkg.com/jodit@4.13.9/es2021/jodit.min.css"
 />
-<script src="https://unpkg.com/jodit@4.12.37/es2021/jodit.min.js"></script>
+<script src="https://unpkg.com/jodit@4.13.9/es2021/jodit.min.js"></script>
 ```
 
 ### Usage
@@ -257,6 +254,11 @@ const editor = Jodit.make('#editor', {
   }
 });
 ```
+
+> **Using Jodit in a commercial product?**
+> Remove the "Powered by Jodit" mark and unlock 20+ premium plugins — Finder file manager, PDF &amp; Word export, @mentions, AI Assistant and more. One-time license from $99.
+>
+> [**Compare plans →**](https://xdsoft.net/jodit/pro/)
 
 ## Browser Support
 
