@@ -1,0 +1,38 @@
+name: Close stale issues
+
+# Surgically nudges/closes only issues that are waiting on the reporter for more
+# information or a runnable reproduction — never generic open bugs or PRs.
+
+on:
+    schedule:
+        - cron: '37 1 * * *'
+    workflow_dispatch:
+
+permissions:
+    issues: write
+
+jobs:
+    stale:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9
+              with:
+                  any-of-labels: 'the error is not reproduced,Need more information,need an error repetition algorithm'
+                  exempt-issue-labels: 'pinned,security,fixed'
+                  days-before-stale: 30
+                  days-before-close: 14
+                  stale-issue-label: 'stale'
+                  stale-issue-message: >
+                      This issue has been waiting on a runnable reproduction or
+                      more information for a while, so it's now marked stale. If
+                      it's still relevant, please add the requested details — it
+                      will be closed in 14 days if there's no further activity.
+                  close-issue-message: >
+                      Closing due to inactivity — we couldn't reproduce this
+                      without a runnable example. Comment with a repro anytime
+                      and we'll gladly reopen.
+                  # Issues only — don't touch pull requests.
+                  days-before-pr-stale: -1
+                  days-before-pr-close: -1
+                  operations-per-run: 60
+                  ascending: true

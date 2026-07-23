@@ -1,0 +1,28 @@
+# Categorization for GitHub's auto-generated release notes / the "Generate
+# release notes" button. (The Publish workflow already fills release bodies from
+# CHANGELOG.md; this shapes the auto-generated fallback and the PR-based notes.)
+changelog:
+  exclude:
+    labels:
+      - 'ignore-for-release'
+    authors:
+      - 'dependabot'
+  categories:
+    - title: 🚀 Features
+      labels:
+        - 'enhancement'
+        - 'Feature Request'
+    - title: 🐛 Bug Fixes
+      labels:
+        - 'bug'
+        - 'fixed'
+    - title: 🔒 Security
+      labels:
+        - 'security'
+    - title: 🧹 Dependencies & Maintenance
+      labels:
+        - 'dependencies'
+        - 'ci'
+    - title: Other Changes
+      labels:
+        - '*'

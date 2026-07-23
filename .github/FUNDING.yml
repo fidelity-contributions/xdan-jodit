@@ -1,0 +1,5 @@
+# Shows a "Sponsor" button on the repository.
+# Jodit is MIT and free — a PRO / OEM license funds development and unlocks
+# premium plugins, source code and priority support.
+custom:
+  - 'https://xdsoft.net/jodit/pro/'

@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # Keep GitHub Actions pinned to SHAs up to date (bumps the pinned SHA + the
+  # trailing version comment when a new release ships).
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    labels:
+      - 'dependencies'
+      - 'ci'
+
+  # npm dev/runtime dependencies.
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    labels:
+      - 'dependencies'

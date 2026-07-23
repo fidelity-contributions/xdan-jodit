@@ -1,0 +1,28 @@
+# Auto-labels pull requests by the paths they touch. Used by .github/workflows/labeler.yml
+plugins:
+    - changed-files:
+          - any-glob-to-any-file: 'src/plugins/**'
+
+core:
+    - changed-files:
+          - any-glob-to-any-file: 'src/core/**'
+
+styles:
+    - changed-files:
+          - any-glob-to-any-file: ['src/styles/**', '**/*.less']
+
+tests:
+    - changed-files:
+          - any-glob-to-any-file: ['**/*.test.js', 'test/**']
+
+documentation:
+    - changed-files:
+          - any-glob-to-any-file: ['**/*.md', 'src/**/README.md']
+
+ci:
+    - changed-files:
+          - any-glob-to-any-file: ['.github/**', 'Makefile', 'tools/**']
+
+dependencies:
+    - changed-files:
+          - any-glob-to-any-file: ['package.json', 'package-lock.json']

@@ -1,0 +1,39 @@
+name: Greetings
+
+on:
+    pull_request_target:
+        types: [opened]
+    issues:
+        types: [opened]
+
+permissions:
+    issues: write
+    pull-requests: write
+
+jobs:
+    greeting:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/first-interaction@3c71ce730280171fd1cfb57c00c774f8998586f7 # v1
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  issue-message: >
+                      👋 Thanks for opening your first issue in Jodit!
+
+
+                      To help us reproduce it fast, please include your Jodit
+                      version, browser/OS, and a minimal runnable example
+                      (CodePen / JSFiddle / StackBlitz) or the exact
+                      `editor.value` / config that triggers the problem.
+
+
+                      Using Jodit in a commercial product? A
+                      [PRO / OEM license](https://xdsoft.net/jodit/pro/)
+                      includes priority support.
+                  pr-message: >
+                      🎉 Thanks for your first pull request to Jodit!
+
+
+                      A maintainer will review it soon. Please make sure the CI
+                      checks pass and that new behaviour is covered by tests
+                      (`make test`). Appreciate the contribution!
